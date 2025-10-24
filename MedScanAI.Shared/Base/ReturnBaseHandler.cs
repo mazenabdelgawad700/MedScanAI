@@ -2,9 +2,9 @@
 
 namespace MedScanAI.Shared.Base
 {
-    public class ReturnBaseHandler
+    public static class ReturnBaseHandler
     {
-        public ReturnBase<T> Success<T>(T entity, string? message = null)
+        public static ReturnBase<T> Success<T>(T entity, string? message = null)
         {
             return new ReturnBase<T>()
             {
@@ -14,7 +14,7 @@ namespace MedScanAI.Shared.Base
                 Message = message ?? "Success",
             };
         }
-        public ReturnBase<T> Failed<T>(string? message = null)
+        public static ReturnBase<T> Failed<T>(string? message = null)
         {
             return new ReturnBase<T>()
             {

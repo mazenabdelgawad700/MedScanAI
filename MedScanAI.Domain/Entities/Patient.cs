@@ -29,18 +29,7 @@ namespace MedScanAI.Domain.Entities
         public string Gender { get; set; }
 
         [Required]
-        public DateTime DateOfBirth { get; set; }
-
-        [MaxLength(5)]
-        public string BloodType { get; set; }
-
-        [MaxLength(200)]
-        public string EmergencyContactName { get; set; }
-
-        [MaxLength(20)]
-        [Phone]
-        public string EmergencyContactPhone { get; set; }
-
+        public DateOnly DateOfBirth { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

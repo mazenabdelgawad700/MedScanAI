@@ -23,6 +23,7 @@ namespace MedScanAI.Infrastructure.Context
         public DbSet<AIChatSession> AIChatSessions { get; set; }
         public DbSet<AIChatMessage> AIChatMessages { get; set; }
         public DbSet<AIReport> AIReports { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -129,6 +130,52 @@ namespace MedScanAI.Infrastructure.Context
                 .WithOne(a => a.AIReport)
                 .HasForeignKey<AIReport>(r => r.AppointmentId)
                 .OnDelete(DeleteBehavior.SetNull); // If appointment deleted, set AppointmentId to null
+
+
+            // ============================================ 
+            // REFRESH TOKEN RELATIONSHIPS
+            // ============================================
+
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.ToTable("RefreshTokens");
+
+                entity.HasKey(rt => rt.Id);
+
+                entity.Property(rt => rt.UserRefreshToken)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(rt => rt.JwtId)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(rt => rt.IsUsed)
+                    .HasDefaultValue(false);
+
+                entity.Property(rt => rt.IsRevoked)
+                    .HasDefaultValue(false);
+
+                entity.Property(rt => rt.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()")
+                    .ValueGeneratedOnAdd();
+
+                // Relationships
+                entity.HasOne(rt => rt.User)
+                    .WithMany(u => u.RefreshTokens)
+                    .HasForeignKey(rt => rt.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Indexes
+                entity.HasIndex(rt => rt.UserRefreshToken)
+                    .IsUnique()
+                    .HasDatabaseName("IX_RefreshTokens_Token_Unique");
+
+                entity.HasIndex(rt => rt.JwtId);
+                entity.HasIndex(rt => rt.UserId);
+                entity.HasIndex(rt => rt.ExpiresAt);
+                entity.HasIndex(rt => new { rt.IsUsed, rt.IsRevoked, rt.ExpiresAt });
+            });
 
             // ============================================
             // INDEXES FOR PERFORMANCE

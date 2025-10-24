@@ -17,11 +17,5 @@
 	  <ProjectReference Include="..\MedScanAI.Infrastructure\MedScanAI.Infrastructure.csproj" />
 	  <ProjectReference Include="..\MedScanAI.Shared\MedScanAI.Shared.csproj" />
 	</ItemGroup>
-
-
-	<ItemGroup>
-	  <Folder Include="Abstracts\" />
-	  <Folder Include="Implementation\" />
-	</ItemGroup>
 	
 </Project>

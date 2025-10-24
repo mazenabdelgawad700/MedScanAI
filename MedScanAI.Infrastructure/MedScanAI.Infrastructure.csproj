@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Abstracts\" />
     <Folder Include="Repositories\" />
-    <Folder Include="RepositoryBase\" />
   </ItemGroup>
 
 

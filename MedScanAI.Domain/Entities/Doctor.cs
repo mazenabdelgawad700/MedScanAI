@@ -14,8 +14,19 @@ namespace MedScanAI.Domain.Entities
         [ForeignKey("Specialization")]
         public int SpecializationId { get; set; }
 
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string FullName { get; set; }
         public int YearsOfExperience { get; set; }
         public bool IsActive { get; set; } = true;
+        [Required]
+        [MaxLength(20)]
+        [Phone]
+        public string PhoneNumber { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -23,7 +34,6 @@ namespace MedScanAI.Domain.Entities
         public ApplicationUser ApplicationUser { get; set; }
         public Specialization Specialization { get; set; }
 
-        // One-to-Many relationships
         public ICollection<DoctorSchedule> Schedules { get; set; } = new List<DoctorSchedule>();
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     }
