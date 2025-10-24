@@ -9,9 +9,8 @@ namespace MedScanAI.Domain.Entities
         [Key]
         public int Id { get; set; }
 
-        [Required]
         [ForeignKey("Patient")]
-        public string PatientId { get; set; }
+        public string? PatientId { get; set; }
 
         [Required]
         [ForeignKey("Doctor")]
