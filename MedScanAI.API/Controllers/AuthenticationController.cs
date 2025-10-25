@@ -38,7 +38,7 @@ namespace MedScanAI.API.Controllers
             return ReturnResult(response);
         }
         [HttpPost]
-        public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordCommand command)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
         {
             ReturnBase<bool> response = await Mediator.Send(command);
             return ReturnResult(response);

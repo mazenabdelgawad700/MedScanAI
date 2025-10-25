@@ -358,14 +358,14 @@ namespace MedScanAI.Service.Implementation
 
                 string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
                 string encodedToken = WebUtility.UrlEncode(resetPasswordToken);
-                HttpRequest requestAccessor = _httpContextAccessor.HttpContext.Request;
 
+                string frontendUrl = "http://localhost:5173";
                 UriBuilder uriBuilder = new()
                 {
-                    Scheme = requestAccessor.Scheme,
-                    Host = requestAccessor.Host.Host,
-                    Port = requestAccessor.Host.Port ?? -1,
-                    Path = "api/authentication/ResetPassword",
+                    Scheme = new Uri(frontendUrl).Scheme,
+                    Host = new Uri(frontendUrl).Host,
+                    Port = new Uri(frontendUrl).Port,
+                    Path = "reset-password",
                     Query = $"email={Uri.EscapeDataString(email)}&token={encodedToken}"
                 };
 
@@ -397,9 +397,7 @@ namespace MedScanAI.Service.Implementation
                 if (user is null)
                     return ReturnBaseHandler.Failed<bool>("User Not Found");
 
-                string decodedToken = WebUtility.UrlDecode(resetPasswordToken);
-
-                IdentityResult resetPasswordResult = await _userManager.ResetPasswordAsync(user, decodedToken, newPassword);
+                IdentityResult resetPasswordResult = await _userManager.ResetPasswordAsync(user, resetPasswordToken, newPassword);
 
                 if (resetPasswordResult.Succeeded)
                     return ReturnBaseHandler.Success(true, "Password has been reset successfully");
