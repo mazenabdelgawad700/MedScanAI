@@ -30,20 +30,12 @@ namespace MedScanAI.Service.Implementation
                 {
                     string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     string encodedToken = WebUtility.UrlEncode(code);
-                    HttpRequest resquestAccessor = _httpContextAccessor.HttpContext.Request;
 
-                    UriBuilder uriBuilder = new()
-                    {
-                        Scheme = resquestAccessor.Scheme,
-                        Host = resquestAccessor.Host.Host,
-                        Port = resquestAccessor.Host.Port ?? -1,
-                        Path = "api/authentication/ConfirmEmail",
-                        Query = $"userId={user.Id}&token={encodedToken}"
-                    };
+                    const string frontendUrl = "http://localhost:5173";
 
-                    string returnUrl = uriBuilder.ToString();
+                    string confirmationUrl = $"{frontendUrl}/confirm-email?userId={user.Id}&token={encodedToken}";
 
-                    string message = $"To Confirm Email Click Link: <a href=\"{returnUrl}\">Confirmation Link</a>";
+                    string message = $"To Confirm Email Click Link: <a href=\"{confirmationUrl}\">Confirmation Link</a>";
 
                     ReturnBase<bool> sendEmailResult = await _emailService.SendEmailAsync(user.Email, message, "Confirmation Link", "text/html");
 
