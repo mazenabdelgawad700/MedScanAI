@@ -138,7 +138,7 @@ namespace MedScanAI.Core.Features.Authentication.Command.Handler
         {
             try
             {
-                var mappedResult = _mapper.Map<Doctor>(request);
+                var mappedResult = _mapper.Map<Domain.Entities.Doctor>(request);
 
                 var registerDoctorResult = await _authenticationService.RegisterDoctorAsync(mappedResult, request.Password);
 

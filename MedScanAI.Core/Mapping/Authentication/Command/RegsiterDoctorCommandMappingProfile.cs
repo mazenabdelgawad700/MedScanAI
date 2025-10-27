@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using MedScanAI.Core.Features.Authentication.Command.Model;
-using MedScanAI.Domain.Entities;
 
 namespace MedScanAI.Core.Mapping.Authentication.Command
 {
@@ -8,7 +7,7 @@ namespace MedScanAI.Core.Mapping.Authentication.Command
     {
         public RegsiterDoctorCommandMappingProfile()
         {
-            CreateMap<RegisterDoctorCommand, Doctor>();
+            CreateMap<RegisterDoctorCommand, Domain.Entities.Doctor>();
         }
     }
 }
