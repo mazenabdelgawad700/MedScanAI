@@ -10,6 +10,7 @@ namespace MedScanAI.Core.Features.Authentication.Command.Handler
     public class AuthenticationCommandHandler :
         IRequestHandler<RegisterDoctorCommand, ReturnBase<bool>>,
         IRequestHandler<RegisterPatientCommand, ReturnBase<bool>>,
+        IRequestHandler<RegisterAdminCommand, ReturnBase<bool>>,
         IRequestHandler<ConfirmEmailCommand, ReturnBase<bool>>,
         IRequestHandler<ResetPasswordCommand, ReturnBase<bool>>,
         IRequestHandler<SendResetPasswordEmailCommand, ReturnBase<bool>>,
@@ -163,6 +164,25 @@ namespace MedScanAI.Core.Features.Authentication.Command.Handler
                     return ReturnBaseHandler.Failed<bool>(registerPatientResult.Message);
 
                 return ReturnBaseHandler.Success(true, registerPatientResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(RegisterAdminCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var mappedResult = _mapper.Map<ApplicationUser>(request);
+
+                var registerAdminResult = await _authenticationService.RegisterAdminAsync(mappedResult, request.Password);
+
+                if (!registerAdminResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(registerAdminResult.Message);
+
+                return ReturnBaseHandler.Success(true, registerAdminResult.Message);
             }
             catch (Exception ex)
             {

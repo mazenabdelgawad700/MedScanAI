@@ -12,6 +12,7 @@ namespace MedScanAI.API.Controllers
     {
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RegisterDoctor([FromBody] RegisterDoctorCommand command)
         {
             ReturnBase<bool> response = await Mediator.Send(command);
@@ -20,6 +21,14 @@ namespace MedScanAI.API.Controllers
 
         [HttpPost]
         public async Task<IActionResult> RegisterPatient([FromBody] RegisterPatientCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return ReturnResult(response);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterAdminCommand command)
         {
             ReturnBase<bool> response = await Mediator.Send(command);
             return ReturnResult(response);

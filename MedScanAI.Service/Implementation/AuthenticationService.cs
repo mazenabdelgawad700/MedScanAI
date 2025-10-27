@@ -430,5 +430,34 @@ namespace MedScanAI.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
             }
         }
+        public async Task<ReturnBase<bool>> RegisterAdminAsync(ApplicationUser user, string password)
+        {
+            try
+            {
+                var existingUser = await _userManager.FindByEmailAsync(user.Email);
+                if (existingUser != null)
+                    return ReturnBaseHandler.Failed<bool>("User with this email already exists");
+
+                user.Id = Guid.NewGuid().ToString();
+
+                var createUserResult = await _userManager.CreateAsync(user, password);
+
+                if (!createUserResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(createUserResult.Errors.FirstOrDefault()?.Description ?? "Can not create user, please try again");
+
+                var addtoRoleResult = await _userManager.AddToRoleAsync(user, "Admin");
+
+                if (!addtoRoleResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(addtoRoleResult.Errors.FirstOrDefault()?.Description ?? "Can not add user to role, please try again");
+
+                user.EmailConfirmed = true;
+
+                return ReturnBaseHandler.Success(true, "User has been registered successfully");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
     }
 }
