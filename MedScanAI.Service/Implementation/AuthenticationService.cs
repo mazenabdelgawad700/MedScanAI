@@ -171,14 +171,14 @@ namespace MedScanAI.Service.Implementation
 
                 await _dbContext.SaveChangesAsync();
 
-                if (!user.EmailConfirmed)
-                {
-                    ReturnBase<bool> sendConfirmationEmailResult = await _confirmEmailService.SendConfirmationEmailAsync(user);
-                    if (sendConfirmationEmailResult.Succeeded)
-                    {
-                        return ReturnBaseHandler.Success<string>($"A Confirmation Email has been sent to {user.Email}. Please confirm your email first and then log in.");
-                    }
-                }
+                //if (!user.EmailConfirmed)
+                //{
+                //    ReturnBase<bool> sendConfirmationEmailResult = await _confirmEmailService.SendConfirmationEmailAsync(user);
+                //    if (sendConfirmationEmailResult.Succeeded)
+                //    {
+                //        return ReturnBaseHandler.Success<string>($"A Confirmation Email has been sent to {user.Email}. Please confirm your email first and then log in.");
+                //    }
+                //}
                 return ReturnBaseHandler.Success(token, "Logged in successfully");
 
             }

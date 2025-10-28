@@ -12,6 +12,7 @@ namespace MedScanAI.Service
             services.AddTransient<ISendEmailService, SendEmailService>();
             services.AddTransient<IConfirmEmailService, ConfirmEmailService>();
             services.AddTransient<IDoctorService, DoctorService>();
+            services.AddTransient<IPatientProfileService, PatientProfileService>();
 
             return services;
         }
