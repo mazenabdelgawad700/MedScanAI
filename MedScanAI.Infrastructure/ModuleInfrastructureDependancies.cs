@@ -13,6 +13,7 @@ namespace MedScanAI.Infrastructure
             services.AddTransient<ICurrentMedicationRepository, CurrentMedicationRepository>();
             services.AddTransient<IChronicDiseasesRepository, ChronicDiseasesRepository>();
             services.AddTransient<IPatientRepository, PatientRepository>();
+            services.AddTransient<IDoctorScheduleRepository, DoctorScheduleRepository>();
 
             return services;
         }

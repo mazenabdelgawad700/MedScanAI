@@ -1,5 +1,6 @@
 ﻿using MedScanAI.Domain.Entities;
 using MedScanAI.Domain.Helpers;
+using MedScanAI.Infrastructure.Abstracts;
 using MedScanAI.Infrastructure.Context;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
@@ -24,8 +25,9 @@ namespace MedScanAI.Service.Implementation
         private readonly JwtSettings _jwtSettings;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ISendEmailService _emailService;
+        private readonly IDoctorScheduleRepository _doctorScheduleRepository;
 
-        public AuthenticationService(UserManager<ApplicationUser> userManager, IConfirmEmailService confirmEmailService, AppDbContext dbContext, JwtSettings jwtSettings, IHttpContextAccessor httpContextAccessor, ISendEmailService emailService, RoleManager<IdentityRole> roleManager)
+        public AuthenticationService(UserManager<ApplicationUser> userManager, IConfirmEmailService confirmEmailService, AppDbContext dbContext, JwtSettings jwtSettings, IHttpContextAccessor httpContextAccessor, ISendEmailService emailService, RoleManager<IdentityRole> roleManager, IDoctorScheduleRepository doctorScheduleRepository)
         {
             this._userManager = userManager;
             this._roleManager = roleManager;
@@ -34,6 +36,7 @@ namespace MedScanAI.Service.Implementation
             this._jwtSettings = jwtSettings;
             this._httpContextAccessor = httpContextAccessor;
             this._emailService = emailService;
+            this._doctorScheduleRepository = doctorScheduleRepository;
         }
 
         public async Task<ReturnBase<bool>> RegisterPatientAsync(Patient patient, string password)
@@ -95,7 +98,7 @@ namespace MedScanAI.Service.Implementation
 
             return response;
         }
-        public async Task<ReturnBase<bool>> RegisterDoctorAsync(Doctor doctor, string password)
+        public async Task<ReturnBase<bool>> RegisterDoctorAsync(Doctor doctor, List<string> workDays, TimeSpan startTime, TimeSpan endTime, string password)
         {
             var response = new ReturnBase<bool>();
 
@@ -134,6 +137,18 @@ namespace MedScanAI.Service.Implementation
 
                 _dbContext.Doctors.Add(doctor);
                 await _dbContext.SaveChangesAsync();
+
+                foreach (var day in workDays)
+                {
+                    var doctorSchedule = new DoctorSchedule
+                    {
+                        DoctorId = doctor.Id,
+                        DayOfWeek = day,
+                        StartTime = startTime,
+                        EndTime = endTime,
+                    };
+                    await _doctorScheduleRepository.AddAsync(doctorSchedule);
+                }
 
                 response.Succeeded = true;
                 response.Message = "Doctor registered successfully.";

@@ -11,5 +11,8 @@ namespace MedScanAI.Core.Features.Authentication.Command.Model
         public string PhoneNumber { get; set; }
         public int YearsOfExperience { get; set; }
         public int SpecializationId { get; set; }
+        public List<string> WorkDays { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
     }
 }

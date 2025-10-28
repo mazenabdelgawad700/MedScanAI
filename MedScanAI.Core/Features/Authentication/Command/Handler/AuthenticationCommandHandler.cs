@@ -140,7 +140,7 @@ namespace MedScanAI.Core.Features.Authentication.Command.Handler
             {
                 var mappedResult = _mapper.Map<Domain.Entities.Doctor>(request);
 
-                var registerDoctorResult = await _authenticationService.RegisterDoctorAsync(mappedResult, request.Password);
+                var registerDoctorResult = await _authenticationService.RegisterDoctorAsync(mappedResult, request.WorkDays, request.StartTime, request.EndTime, request.Password);
 
                 if (!registerDoctorResult.Succeeded)
                     return ReturnBaseHandler.Failed<bool>(registerDoctorResult.Message);
