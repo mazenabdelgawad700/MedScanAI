@@ -8,7 +8,9 @@ using MedScanAI.Shared.Base;
 namespace MedScanAI.Core.Features.Doctor.Query.Handler
 {
     public class DoctorQueryHandler : IRequestHandler<GetAllDoctorsQuery, ReturnBase<IQueryable<GetAllDoctorsResponse>>>,
-        IRequestHandler<GetAllActiveDoctorsQuery, ReturnBase<IQueryable<GetAllActiveDoctorsResponse>>>
+        IRequestHandler<GetAllActiveDoctorsQuery, ReturnBase<IQueryable<GetAllActiveDoctorsResponse>>>,
+        IRequestHandler<GetAllDoctorsCountQuery, ReturnBase<int>>,
+        IRequestHandler<GetActiveDoctorsCountQuery, ReturnBase<int>>
     {
 
         private readonly IDoctorService _doctorService;
@@ -59,6 +61,35 @@ namespace MedScanAI.Core.Features.Doctor.Query.Handler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<IQueryable<GetAllActiveDoctorsResponse>>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<int>> Handle(GetAllDoctorsCountQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var countResult = await _doctorService.GetAllDoctorsCountAsync();
+                if (!countResult.Succeeded)
+                    return ReturnBaseHandler.Failed<int>(countResult.Message ?? "Failed to retrieve doctors count.");
+                return ReturnBaseHandler.Success(countResult.Data);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<int>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+        public async Task<ReturnBase<int>> Handle(GetActiveDoctorsCountQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var countResult = await _doctorService.GetActiveDoctorsCountAsync();
+                if (!countResult.Succeeded)
+                    return ReturnBaseHandler.Failed<int>(countResult.Message ?? "Failed to retrieve active doctors count.");
+                return ReturnBaseHandler.Success(countResult.Data);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<int>(ex.InnerException?.Message ?? ex.Message);
             }
         }
     }

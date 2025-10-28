@@ -81,6 +81,32 @@ namespace MedScanAI.Service.Implementation
                 return ReturnBaseHandler.Failed<IQueryable<Doctor>>(ex.InnerException?.Message ?? ex.Message);
             }
         }
+        public async Task<ReturnBase<int>> GetAllDoctorsCountAsync()
+        {
+            try
+            {
+                int doctorsCount = await _doctorRepository.GetTableNoTracking().Data!.CountAsync();
 
+                return ReturnBaseHandler.Success(doctorsCount);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<int>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+        public async Task<ReturnBase<int>> GetActiveDoctorsCountAsync()
+        {
+            try
+            {
+                int doctorsCount = await _doctorRepository.GetTableNoTracking().Data!
+                    .Where(x => x.IsActive == true).CountAsync();
+
+                return ReturnBaseHandler.Success(doctorsCount);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<int>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
     }
 }

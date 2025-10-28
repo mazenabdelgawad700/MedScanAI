@@ -42,5 +42,21 @@ namespace MedScanAI.API.Controllers
             var response = await Mediator.Send(query);
             return ReturnResult(response);
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetActiveCount([FromQuery] GetActiveDoctorsCountQuery query)
+        {
+            var response = await Mediator.Send(query);
+            return ReturnResult(response);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetCount([FromQuery] GetAllDoctorsCountQuery query)
+        {
+            var response = await Mediator.Send(query);
+            return ReturnResult(response);
+        }
     }
 }

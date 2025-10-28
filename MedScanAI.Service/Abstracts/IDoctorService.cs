@@ -8,5 +8,7 @@ namespace MedScanAI.Service.Abstracts
         Task<ReturnBase<bool>> RestoreDoctorAsync(string doctorId);
         Task<ReturnBase<IQueryable<Domain.Entities.Doctor>>> GetAllDoctorsAsync();
         Task<ReturnBase<IQueryable<Domain.Entities.Doctor>>> GetActiveDoctorsAsync();
+        Task<ReturnBase<int>> GetAllDoctorsCountAsync();
+        Task<ReturnBase<int>> GetActiveDoctorsCountAsync();
     }
 }
