@@ -2,7 +2,7 @@
 using MedScanAI.Core.Features.PatientFeature.Command.Model;
 using MedScanAI.Core.Features.PatientFeature.Query.Model;
 using MedScanAI.Shared.Base;
-using MedScanAI.Shared.SahredResponse;
+using MedScanAI.Shared.SharedResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

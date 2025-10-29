@@ -2,7 +2,7 @@
 using MedScanAI.Infrastructure.Abstracts;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
-using MedScanAI.Shared.SahredResponse;
+using MedScanAI.Shared.SharedResponse;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedScanAI.Service.Implementation

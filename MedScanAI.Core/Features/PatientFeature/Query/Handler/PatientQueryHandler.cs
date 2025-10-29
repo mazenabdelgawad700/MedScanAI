@@ -2,7 +2,7 @@
 using MedScanAI.Core.Features.PatientFeature.Query.Model;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
-using MedScanAI.Shared.SahredResponse;
+using MedScanAI.Shared.SharedResponse;
 
 namespace MedScanAI.Core.Features.PatientFeature.Query.Handler
 {

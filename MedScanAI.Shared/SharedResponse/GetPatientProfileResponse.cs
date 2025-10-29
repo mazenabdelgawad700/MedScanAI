@@ -1,4 +1,4 @@
-﻿namespace MedScanAI.Shared.SahredResponse
+﻿namespace MedScanAI.Shared.SharedResponse
 {
     public class GetPatientProfileResponse
     {

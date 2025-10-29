@@ -1,5 +1,5 @@
 ﻿using MedScanAI.Shared.Base;
-using MedScanAI.Shared.SahredResponse;
+using MedScanAI.Shared.SharedResponse;
 
 namespace MedScanAI.Service.Abstracts
 {

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using MedScanAI.Shared.Base;
-using MedScanAI.Shared.SahredResponse;
+using MedScanAI.Shared.SharedResponse;
 
 namespace MedScanAI.Core.Features.PatientFeature.Query.Model
 {
