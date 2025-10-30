@@ -4,11 +4,13 @@ using MedScanAI.Core.Features.AppointmentFeature.Query.Model;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
 using MedScanAI.Shared.SahredResponse;
+using MedScanAI.Shared.SharedResponse;
 
 namespace MedScanAI.Core.Features.AppointmentFeature.Query.Handler
 {
     public class AppointmentQueryHandler :
-        IRequestHandler<GetDoctorsForAppointmentsQuery, ReturnBase<List<GetDoctorsForAppointmentsResponse>>>
+        IRequestHandler<GetDoctorsForAppointmentsQuery, ReturnBase<List<GetDoctorsForAppointmentsResponse>>>,
+        IRequestHandler<GetTodayAppointmentsQuery, ReturnBase<List<GetTodayAppointmentsResponse>>>
     {
 
         private readonly IAppointmentService _appointmentsService;
@@ -36,6 +38,25 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Query.Handler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<List<GetDoctorsForAppointmentsResponse>>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<List<GetTodayAppointmentsResponse>>> Handle(GetTodayAppointmentsQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var appointmentsResult = await _appointmentsService.GetTodaysAppointmentsAsync();
+
+                if (!appointmentsResult.Succeeded)
+                    return ReturnBaseHandler.Failed<List<GetTodayAppointmentsResponse>>(appointmentsResult.Message);
+
+                var mappedResult = _mapper.Map<List<GetTodayAppointmentsResponse>>(appointmentsResult.Data);
+
+                return ReturnBaseHandler.Success(mappedResult, appointmentsResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<List<GetTodayAppointmentsResponse>>(ex.InnerException?.Message ?? ex.Message);
             }
         }
     }

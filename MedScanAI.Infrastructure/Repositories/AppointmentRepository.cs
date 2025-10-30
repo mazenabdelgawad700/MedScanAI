@@ -4,6 +4,7 @@ using MedScanAI.Infrastructure.Context;
 using MedScanAI.Infrastructure.RepositoryBase;
 using MedScanAI.Shared.Base;
 using MedScanAI.Shared.SahredResponse;
+using MedScanAI.Shared.SharedResponse;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedScanAI.Infrastructure.Repositories
@@ -12,10 +13,12 @@ namespace MedScanAI.Infrastructure.Repositories
     {
         private readonly AppDbContext _dbContext;
         private readonly DbSet<Doctor> _doctors;
+        private readonly DbSet<Appointment> _appointments;
         public AppointmentRepository(AppDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
             _doctors = _dbContext.Set<Doctor>();
+            _appointments = _dbContext.Set<Appointment>();
         }
 
 
@@ -108,42 +111,35 @@ namespace MedScanAI.Infrastructure.Repositories
                     ex.InnerException?.Message ?? ex.Message);
             }
         }
+        public async Task<ReturnBase<List<GetTodayAppointmentsResponse>>> GetTodayAppointmentsAsync()
+        {
+            try
+            {
+                var today = DateTime.Today;
 
+                var todayAppointments = await _dbContext.Appointments
+                    .Include(a => a.Doctor)
+                    .Include(a => a.Patient)
+                    .Where(a => a.Date.Date == today)
+                    .Select(a => new GetTodayAppointmentsResponse
+                    {
+                        Time = a.Date.ToString("hh:mm tt", new System.Globalization.CultureInfo("en-EG")),
+                        DoctorName = a.Doctor != null ? a.Doctor.FullName : "غير محدد",
+                        PatientName = a.Patient != null
+                                    ? a.Patient.FullName
+                                    : (string.IsNullOrEmpty(a.PatientName) ? "زائر" : a.PatientName)
+                    })
+                    .ToListAsync();
 
-        //public async Task<ReturnBase<List<GetDoctorsForAppointmentsResponse>>> GetDoctorsForAppointmentsAsync()
-        //{
-        //    try
-        //    {
-        //        // Get today's day of week (e.g., "Monday", "Tuesday")
-        //        var today = DateTime.Now.DayOfWeek.ToString().ToLower();
-        //        var currentTime = DateTime.Now.TimeOfDay;
+                return ReturnBaseHandler.Success(todayAppointments);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<List<GetTodayAppointmentsResponse>>(
+                    ex.InnerException?.Message ?? ex.Message
+                );
+            }
+        }
 
-        //        var doctors = await _dbContext.Doctors
-        //            .Include(d => d.Specialization)
-        //            .Include(d => d.Schedules)
-        //            .Where(d => d.IsActive)
-        //            .Where(d => d.Schedules.Any(s =>
-        //                s.DayOfWeek == today &&
-        //                s.IsAvailable &&
-        //                s.StartTime <= currentTime &&
-        //                s.EndTime >= currentTime
-        //            ))
-        //            .Select(d => new GetDoctorsForAppointmentsResponse
-        //            {
-        //                Id = d.Id,
-        //                FullName = d.FullName,
-        //                Specialization = d.Specialization.Name,
-        //                YearsOfExperience = d.YearsOfExperience,
-        //                AvailableStartTimes =
-        //            })
-        //            .ToListAsync();
-
-        //        return ReturnBaseHandler.Success(doctors);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ReturnBaseHandler.Failed<List<GetDoctorsForAppointmentsResponse>>(ex.InnerException?.Message ?? ex.Message);
-        //    }
-        //}
     }
 }

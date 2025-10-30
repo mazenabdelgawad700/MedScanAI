@@ -1,6 +1,7 @@
 ﻿using MedScanAI.Domain.Entities;
 using MedScanAI.Shared.Base;
 using MedScanAI.Shared.SahredResponse;
+using MedScanAI.Shared.SharedResponse;
 
 namespace MedScanAI.Service.Abstracts
 {
@@ -8,5 +9,6 @@ namespace MedScanAI.Service.Abstracts
     {
         Task<ReturnBase<bool>> MakeAppointmentAsync(Appointment appointment);
         Task<ReturnBase<List<GetDoctorsForAppointmentsResponse>>> GetDoctorsForAppointmentsAsync();
+        Task<ReturnBase<List<GetTodayAppointmentsResponse>>> GetTodaysAppointmentsAsync();
     }
 }

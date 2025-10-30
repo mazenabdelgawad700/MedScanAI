@@ -11,6 +11,7 @@ namespace MedScanAI.Domain.Entities
 
         [ForeignKey("Patient")]
         public string? PatientId { get; set; }
+        public string? PatientName { get; set; } // For Guest Patients
 
         [Required]
         [ForeignKey("Doctor")]
