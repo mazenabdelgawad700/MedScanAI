@@ -18,7 +18,7 @@ namespace MedScanAI.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Patient")]
+        [Authorize(Roles = "Patient, Admin")]
         public async Task<IActionResult> GetDoctors([FromQuery] GetDoctorsForAppointmentsQuery query)
         {
             var result = await Mediator.Send(query);
