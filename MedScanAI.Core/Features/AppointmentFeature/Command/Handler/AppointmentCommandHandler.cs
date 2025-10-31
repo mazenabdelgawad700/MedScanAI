@@ -7,7 +7,8 @@ using MedScanAI.Shared.Base;
 namespace MedScanAI.Core.Features.AppointmentFeature.Command.Handler
 {
     public class AppointmentCommandHandler :
-        IRequestHandler<MakeAppointmentCommand, ReturnBase<bool>>
+        IRequestHandler<MakeAppointmentCommand, ReturnBase<bool>>,
+        IRequestHandler<ConfirmAppointmentCommand, ReturnBase<bool>>
     {
 
         private readonly IAppointmentService _appointmentService;
@@ -30,6 +31,23 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Command.Handler
                     return ReturnBaseHandler.Failed<bool>(makeAppointmentResult.Message);
 
                 return ReturnBaseHandler.Success(true, makeAppointmentResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(ConfirmAppointmentCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var confirmResult = await _appointmentService.ConfirmAppointmentAsync(request.AppointmentId);
+
+                if (!confirmResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(confirmResult.Message);
+
+                return ReturnBaseHandler.Success(confirmResult.Data, confirmResult.Message);
             }
             catch (Exception ex)
             {

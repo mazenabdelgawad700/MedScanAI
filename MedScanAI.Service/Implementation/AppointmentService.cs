@@ -19,6 +19,26 @@ namespace MedScanAI.Service.Implementation
             _patientRepository = patientRepository;
         }
 
+        public async Task<ReturnBase<bool>> ConfirmAppointmentAsync(int appointmentId)
+        {
+            try
+            {
+                if (appointmentId <= 0)
+                    return ReturnBaseHandler.Failed<bool>("Invalid appointment ID.");
+
+                var confirmAppointmentResult = await _appointmentRepository.ConfirmAppointmentAsync(appointmentId);
+
+                if (!confirmAppointmentResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(confirmAppointmentResult.Message);
+
+                return ReturnBaseHandler.Success(confirmAppointmentResult.Data, confirmAppointmentResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+
+        }
         public async Task<ReturnBase<List<GetDoctorsForAppointmentsResponse>>> GetDoctorsForAppointmentsAsync()
         {
             try

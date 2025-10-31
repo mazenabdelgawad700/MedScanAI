@@ -21,7 +21,27 @@ namespace MedScanAI.Infrastructure.Repositories
             _appointments = _dbContext.Set<Appointment>();
         }
 
+        public async Task<ReturnBase<bool>> ConfirmAppointmentAsync(int appointmentId)
+        {
+            try
+            {
+                var appointment = await _appointments.Where(x => x.Id == appointmentId).FirstOrDefaultAsync();
 
+                if (appointment is null)
+                    return ReturnBaseHandler.Failed<bool>("Failed to retrieve appointment");
+
+                appointment.Status = "Confirmed";
+
+                _appointments.Update(appointment);
+                await _dbContext.SaveChangesAsync();
+
+                return ReturnBaseHandler.Success(true, "Appointment confirmed successfully");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
         public async Task<ReturnBase<List<GetDoctorsForAppointmentsResponse>>> GetDoctorsForAppointmentsAsync()
         {
             try
@@ -123,11 +143,13 @@ namespace MedScanAI.Infrastructure.Repositories
                     .Where(a => a.Date.Date == today)
                     .Select(a => new GetTodayAppointmentsResponse
                     {
+                        Id = a.Id,
                         Time = a.Date.ToString("hh:mm tt", new System.Globalization.CultureInfo("en-EG")),
                         DoctorName = a.Doctor != null ? a.Doctor.FullName : "غير محدد",
                         PatientName = a.Patient != null
                                     ? a.Patient.FullName
-                                    : (string.IsNullOrEmpty(a.PatientName) ? "زائر" : a.PatientName)
+                                    : (string.IsNullOrEmpty(a.PatientName) ? "زائر" : a.PatientName),
+                        Status = a.Status
                     })
                     .ToListAsync();
 
