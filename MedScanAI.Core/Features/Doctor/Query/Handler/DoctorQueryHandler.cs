@@ -4,13 +4,15 @@ using MedScanAI.Core.Features.Doctor.Query.Model;
 using MedScanAI.Core.Features.Doctor.Query.Response;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
+using MedScanAI.Shared.SharedResponse;
 
 namespace MedScanAI.Core.Features.Doctor.Query.Handler
 {
     public class DoctorQueryHandler : IRequestHandler<GetAllDoctorsQuery, ReturnBase<IQueryable<GetAllDoctorsResponse>>>,
         IRequestHandler<GetAllActiveDoctorsQuery, ReturnBase<IQueryable<GetAllActiveDoctorsResponse>>>,
         IRequestHandler<GetAllDoctorsCountQuery, ReturnBase<int>>,
-        IRequestHandler<GetActiveDoctorsCountQuery, ReturnBase<int>>
+        IRequestHandler<GetActiveDoctorsCountQuery, ReturnBase<int>>,
+        IRequestHandler<GetDoctorAppointmentsAndDoctorInfoQuery, ReturnBase<GetDoctorAppointmentsAndDoctorInfoResponse>>
     {
 
         private readonly IDoctorService _doctorService;
@@ -90,6 +92,23 @@ namespace MedScanAI.Core.Features.Doctor.Query.Handler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<int>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<GetDoctorAppointmentsAndDoctorInfoResponse>> Handle(GetDoctorAppointmentsAndDoctorInfoQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _doctorService.GetDoctorAppointmentsAndDoctorInfoAsync(request.DoctorId);
+
+                if (!result.Succeeded)
+                    return ReturnBaseHandler.Failed<GetDoctorAppointmentsAndDoctorInfoResponse>(result.Message);
+
+                return ReturnBaseHandler.Success(result.Data!);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<GetDoctorAppointmentsAndDoctorInfoResponse>(ex.InnerException?.Message ?? ex.Message);
             }
         }
     }

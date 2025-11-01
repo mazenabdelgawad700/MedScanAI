@@ -1,4 +1,5 @@
 ﻿using MedScanAI.Shared.Base;
+using MedScanAI.Shared.SharedResponse;
 
 namespace MedScanAI.Service.Abstracts
 {
@@ -10,5 +11,6 @@ namespace MedScanAI.Service.Abstracts
         Task<ReturnBase<IQueryable<Domain.Entities.Doctor>>> GetActiveDoctorsAsync();
         Task<ReturnBase<int>> GetAllDoctorsCountAsync();
         Task<ReturnBase<int>> GetActiveDoctorsCountAsync();
+        Task<ReturnBase<GetDoctorAppointmentsAndDoctorInfoResponse>> GetDoctorAppointmentsAndDoctorInfoAsync(string doctorId);
     }
 }

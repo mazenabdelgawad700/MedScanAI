@@ -2,6 +2,7 @@
 using MedScanAI.Infrastructure.Abstracts;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
+using MedScanAI.Shared.SharedResponse;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedScanAI.Service.Implementation
@@ -106,6 +107,22 @@ namespace MedScanAI.Service.Implementation
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<int>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+        public async Task<ReturnBase<GetDoctorAppointmentsAndDoctorInfoResponse>> GetDoctorAppointmentsAndDoctorInfoAsync(string doctorId)
+        {
+            try
+            {
+                var result = await _doctorRepository.GetDoctorAppointmentsAndDoctorInfoAsync(doctorId);
+
+                if (!result.Succeeded)
+                    return ReturnBaseHandler.Failed<GetDoctorAppointmentsAndDoctorInfoResponse>(result.Message ?? "Failed to retrieve doctor appointments and info.");
+
+                return ReturnBaseHandler.Success(result.Data!);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<GetDoctorAppointmentsAndDoctorInfoResponse>(ex.InnerException?.Message ?? ex.Message);
             }
         }
     }
