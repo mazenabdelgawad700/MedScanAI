@@ -8,7 +8,8 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Command.Handler
 {
     public class AppointmentCommandHandler :
         IRequestHandler<MakeAppointmentCommand, ReturnBase<bool>>,
-        IRequestHandler<ConfirmAppointmentCommand, ReturnBase<bool>>
+        IRequestHandler<ConfirmAppointmentCommand, ReturnBase<bool>>,
+        IRequestHandler<CompleteAppointmentCommand, ReturnBase<bool>>
     {
 
         private readonly IAppointmentService _appointmentService;
@@ -48,6 +49,23 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Command.Handler
                     return ReturnBaseHandler.Failed<bool>(confirmResult.Message);
 
                 return ReturnBaseHandler.Success(confirmResult.Data, confirmResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(CompleteAppointmentCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var completeResult = await _appointmentService.CompleteAppointmentAsync(request.AppointmentId);
+
+                if (!completeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(completeResult.Message);
+
+                return ReturnBaseHandler.Success(completeResult.Data, completeResult.Message);
             }
             catch (Exception ex)
             {

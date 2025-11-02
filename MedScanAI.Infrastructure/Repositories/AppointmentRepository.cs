@@ -21,6 +21,27 @@ namespace MedScanAI.Infrastructure.Repositories
             _appointments = _dbContext.Set<Appointment>();
         }
 
+        public async Task<ReturnBase<bool>> CompleteAppointmentAsync(int appointmentId)
+        {
+            try
+            {
+                var appointment = await _appointments.Where(x => x.Id == appointmentId).FirstOrDefaultAsync();
+
+                if (appointment is null)
+                    return ReturnBaseHandler.Failed<bool>("Failed to retrieve appointment");
+
+                appointment.Status = "Completed";
+
+                _appointments.Update(appointment);
+                await _dbContext.SaveChangesAsync();
+
+                return ReturnBaseHandler.Success(true, "Appointment completed successfully");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
         public async Task<ReturnBase<bool>> ConfirmAppointmentAsync(int appointmentId)
         {
             try

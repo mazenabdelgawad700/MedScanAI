@@ -11,5 +11,6 @@ namespace MedScanAI.Infrastructure.Abstracts
         Task<ReturnBase<List<GetDoctorsForAppointmentsResponse>>> GetDoctorsForAppointmentsAsync();
         Task<ReturnBase<List<GetTodayAppointmentsResponse>>> GetTodayAppointmentsAsync();
         Task<ReturnBase<bool>> ConfirmAppointmentAsync(int appointmentId);
+        Task<ReturnBase<bool>> CompleteAppointmentAsync(int appointmentId);
     }
 }

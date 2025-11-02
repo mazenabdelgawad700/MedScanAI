@@ -20,49 +20,6 @@ namespace MedScanAI.Infrastructure.Repositories
             _appointments = _dbContext.Set<Appointment>();
         }
 
-        //public async Task<ReturnBase<GetDoctorAppointmentsAndDoctorInfoResponse>> GetDoctorAppointmentsAndDoctorInfoAsync(string doctorId)
-        //{
-        //    try
-        //    {
-        //        var doctor = await _doctors.Where(x => x.Id == doctorId).FirstOrDefaultAsync();
-
-        //        var appointments = await _appointments
-        //            .Include(x => x.Patient)
-        //            .Where(a => a.DoctorId == doctorId)
-        //            .ToListAsync();
-
-
-        //        var culture = new System.Globalization.CultureInfo("en-EG");
-
-        //        var patientResponse = appointments.Select(a => new PatientResponse
-        //        {
-        //            PatientId = a.PatientId,
-        //            AppointmentDate = a.Date.ToString("hh:mm tt", culture),
-        //            Reason = a.Reason,
-        //            PatientName = a.Patient.FullName,
-        //            ChronicDiseases = a.Patient.ChronicDiseases.Select(x => x.Name).ToList(),
-        //            Allergies = a.Patient.Allergies.Select(x => x.Name).ToList(),
-        //            CurrentMedicine = a.Patient.CurrentMedications.Select(x => x.Name).ToList()
-        //        }).ToList();
-
-
-
-        //        var response = new GetDoctorAppointmentsAndDoctorInfoResponse
-        //        {
-        //            DoctorId = doctor?.Id,
-        //            DoctorName = doctor?.FullName,
-        //            Patients = patientResponse
-        //        };
-
-        //        return ReturnBaseHandler.Success(response);
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ReturnBaseHandler.Failed<GetDoctorAppointmentsAndDoctorInfoResponse>(ex.InnerException?.Message ?? ex.Message);
-        //    }
-        //}
-
         public async Task<ReturnBase<GetDoctorAppointmentsAndDoctorInfoResponse>> GetDoctorAppointmentsAndDoctorInfoAsync(string doctorId)
         {
             try
@@ -79,11 +36,12 @@ namespace MedScanAI.Infrastructure.Repositories
                     .Include(x => x.Patient.Allergies)
                     .Include(x => x.Patient.ChronicDiseases)
                     .Include(x => x.Patient.CurrentMedications)
-                    .Where(a => a.DoctorId == doctorId && a.Date.Date == today)
+                    .Where(a => a.DoctorId == doctorId && a.Date.Date == today && a.Status != "Completed")
                     .ToListAsync();
 
                 var patientResponse = appointments.Select(a => new PatientResponse
                 {
+                    AppointmentId = a.Id,
                     PatientId = a.PatientId,
                     AppointmentDate = a.Date.ToString("hh:mm tt", culture),
                     Reason = a.Reason,
