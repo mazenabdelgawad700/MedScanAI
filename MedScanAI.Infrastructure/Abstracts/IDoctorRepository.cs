@@ -8,5 +8,6 @@ namespace MedScanAI.Infrastructure.Abstracts
     public interface IDoctorRepository : IBaseRepository<Doctor>
     {
         Task<ReturnBase<GetDoctorAppointmentsAndDoctorInfoResponse>> GetDoctorAppointmentsAndDoctorInfoAsync(string doctorId);
+        Task<ReturnBase<Doctor>> GetDoctorAsync(string doctorId);
     }
 }

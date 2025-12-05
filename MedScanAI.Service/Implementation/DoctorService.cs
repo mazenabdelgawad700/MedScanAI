@@ -20,13 +20,13 @@ namespace MedScanAI.Service.Implementation
         {
             try
             {
-                var doctor = await _doctorRepository.GetTableNoTracking().Data.Where(x => x.Id == doctorId).FirstOrDefaultAsync();
+                var doctorResult = await _doctorRepository.GetDoctorAsync(doctorId);
 
-                if (doctor is null)
-                    return ReturnBaseHandler.Failed<bool>("Doctor not found.");
+                if (!doctorResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(doctorResult.Message);
 
-                doctor.IsActive = false;
-                await _doctorRepository.UpdateAsync(doctor);
+                doctorResult.Data!.IsActive = false;
+                await _doctorRepository.UpdateAsync(doctorResult.Data);
 
                 return ReturnBaseHandler.Success(true, "Doctor deleted successfully.");
             }

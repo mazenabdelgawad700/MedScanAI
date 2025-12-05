@@ -68,5 +68,22 @@ namespace MedScanAI.Infrastructure.Repositories
             }
         }
 
+        public async Task<ReturnBase<Doctor>> GetDoctorAsync(string doctorId)
+        {
+            try
+            {
+                var doctor = await _doctors.FirstOrDefaultAsync(x => x.Id == doctorId);
+
+                if (doctor is null)
+                    return ReturnBaseHandler.Failed<Doctor>("Doctor not found");
+                return ReturnBaseHandler.Success(doctor);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<Doctor>(
+                    ex.InnerException?.Message ?? ex.Message
+                );
+            }
+        }
     }
 }
