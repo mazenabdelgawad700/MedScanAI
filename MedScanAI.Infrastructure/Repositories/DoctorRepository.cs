@@ -20,6 +20,53 @@ namespace MedScanAI.Infrastructure.Repositories
             _appointments = _dbContext.Set<Appointment>();
         }
 
+        public ReturnBase<IQueryable<Doctor>> GetActiveDoctors()
+        {
+            try
+            {
+                var activeDoctors = _doctors.Where(d => d.IsActive);
+
+                if (activeDoctors is null)
+                    return ReturnBaseHandler.Failed<IQueryable<Doctor>>("No active doctors found");
+
+                return ReturnBaseHandler.Success(activeDoctors);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<Doctor>>(
+                    ex.InnerException?.Message ?? ex.Message
+                );
+            }
+        }
+
+        public async Task<ReturnBase<int>> GetActiveDoctorsCountAsync()
+        {
+            try
+            {
+                int count = await _doctors.Where(x => x.IsActive == true).CountAsync();
+                return ReturnBaseHandler.Success(count);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<int>(
+                    ex.InnerException?.Message ?? ex.Message
+                );
+            }
+        }
+        public async Task<ReturnBase<int>> GetAllDoctorsCountAsync()
+        {
+            try
+            {
+                int count = await _doctors.CountAsync();
+                return ReturnBaseHandler.Success(count);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<int>(
+                    ex.InnerException?.Message ?? ex.Message
+                );
+            }
+        }
         public async Task<ReturnBase<GetDoctorAppointmentsAndDoctorInfoResponse>> GetDoctorAppointmentsAndDoctorInfoAsync(string doctorId)
         {
             try
@@ -67,7 +114,6 @@ namespace MedScanAI.Infrastructure.Repositories
                 );
             }
         }
-
         public async Task<ReturnBase<Doctor>> GetDoctorAsync(string doctorId)
         {
             try

@@ -39,13 +39,14 @@ namespace MedScanAI.Service.Implementation
         {
             try
             {
-                var doctor = await _doctorRepository.GetTableNoTracking().Data!.Where(x => x.Id == doctorId).FirstOrDefaultAsync();
+                var doctorResult = await _doctorRepository.GetDoctorAsync(doctorId);
 
-                if (doctor is null)
-                    return ReturnBaseHandler.Failed<bool>("Doctor not found.");
+                if (!doctorResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(doctorResult.Message);
 
-                doctor.IsActive = true;
-                await _doctorRepository.UpdateAsync(doctor);
+                doctorResult.Data!.IsActive = true;
+
+                await _doctorRepository.UpdateAsync(doctorResult.Data);
 
                 return ReturnBaseHandler.Success(true, "Doctor restored successfully.");
             }
@@ -58,11 +59,9 @@ namespace MedScanAI.Service.Implementation
         {
             try
             {
-                var doctors = await _doctorRepository.GetTableNoTracking().Data!
-                    .Where(x => x.IsActive)
-                    .ToListAsync();
+                var doctors = _doctorRepository.GetActiveDoctors();
 
-                return ReturnBaseHandler.Success(doctors.AsQueryable());
+                return ReturnBaseHandler.Success(doctors.Data!);
             }
             catch (Exception ex)
             {
@@ -86,9 +85,9 @@ namespace MedScanAI.Service.Implementation
         {
             try
             {
-                int doctorsCount = await _doctorRepository.GetTableNoTracking().Data!.CountAsync();
+                var doctorsCountResult = await _doctorRepository.GetAllDoctorsCountAsync();
 
-                return ReturnBaseHandler.Success(doctorsCount);
+                return ReturnBaseHandler.Success(doctorsCountResult.Data);
             }
             catch (Exception ex)
             {
@@ -99,10 +98,9 @@ namespace MedScanAI.Service.Implementation
         {
             try
             {
-                int doctorsCount = await _doctorRepository.GetTableNoTracking().Data!
-                    .Where(x => x.IsActive == true).CountAsync();
+                var doctorsCountResult = await _doctorRepository.GetActiveDoctorsCountAsync();
 
-                return ReturnBaseHandler.Success(doctorsCount);
+                return ReturnBaseHandler.Success(doctorsCountResult.Data);
             }
             catch (Exception ex)
             {

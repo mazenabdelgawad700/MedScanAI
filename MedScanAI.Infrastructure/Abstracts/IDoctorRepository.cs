@@ -9,5 +9,8 @@ namespace MedScanAI.Infrastructure.Abstracts
     {
         Task<ReturnBase<GetDoctorAppointmentsAndDoctorInfoResponse>> GetDoctorAppointmentsAndDoctorInfoAsync(string doctorId);
         Task<ReturnBase<Doctor>> GetDoctorAsync(string doctorId);
+        ReturnBase<IQueryable<Doctor>> GetActiveDoctors();
+        Task<ReturnBase<int>> GetAllDoctorsCountAsync();
+        Task<ReturnBase<int>> GetActiveDoctorsCountAsync();
     }
 }
