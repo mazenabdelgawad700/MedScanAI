@@ -3,6 +3,7 @@ using MedScanAI.Infrastructure;
 using MedScanAI.Infrastructure.Context;
 using MedScanAI.Service;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedScanAI.API
@@ -45,6 +46,18 @@ namespace MedScanAI.API
             #endregion
 
 
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.AddSlidingWindowLimiter("SlidingWindowPolicy", opt =>
+                {
+                    opt.Window = TimeSpan.FromSeconds(10);
+                    opt.PermitLimit = 10;
+                    opt.QueueLimit = 10;
+                    opt.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+
+                }).RejectionStatusCode = 429;
+            });
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -52,6 +65,8 @@ namespace MedScanAI.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseRateLimiter();
 
             app.UseHttpsRedirection();
 

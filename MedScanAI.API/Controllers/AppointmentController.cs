@@ -3,10 +3,12 @@ using MedScanAI.Core.Features.AppointmentFeature.Command.Model;
 using MedScanAI.Core.Features.AppointmentFeature.Query.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace MedScanAI.API.Controllers
 {
     [Route("api/appointment/[action]")]
+    [EnableRateLimiting("SlidingWindowPolicy")]
     public class AppointmentController : AppControllerBase
     {
         [HttpPost]

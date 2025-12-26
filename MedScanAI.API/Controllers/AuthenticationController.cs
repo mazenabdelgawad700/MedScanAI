@@ -3,11 +3,13 @@ using MedScanAI.Core.Features.Authentication.Command.Model;
 using MedScanAI.Shared.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace MedScanAI.API.Controllers
 {
     [Route("api/authentication/[action]")]
     [ApiController]
+    [EnableRateLimiting("SlidingWindowPolicy")]
     public class AuthenticationController : AppControllerBase
     {
 

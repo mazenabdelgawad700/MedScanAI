@@ -5,10 +5,12 @@ using MedScanAI.Shared.Base;
 using MedScanAI.Shared.SharedResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace MedScanAI.API.Controllers
 {
     [Route("api/patient/[action]")]
+    [EnableRateLimiting("SlidingWindowPolicy")]
     public class PatientController : AppControllerBase
     {
         [HttpPost]
