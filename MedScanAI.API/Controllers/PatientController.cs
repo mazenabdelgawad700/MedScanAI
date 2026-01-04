@@ -28,5 +28,13 @@ namespace MedScanAI.API.Controllers
             ReturnBase<GetPatientProfileResponse> response = await Mediator.Send(query);
             return ReturnResult(response);
         }
+
+        [HttpPut]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdatePatientProfileCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return ReturnResult(response);
+        }
     }
 }

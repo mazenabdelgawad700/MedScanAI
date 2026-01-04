@@ -3,6 +3,7 @@ using MedScanAI.Infrastructure.Abstracts;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
 using MedScanAI.Shared.SharedResponse;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedScanAI.Service.Implementation
@@ -14,13 +15,17 @@ namespace MedScanAI.Service.Implementation
         private readonly ICurrentMedicationRepository _currentMedicationRepository;
         private readonly IPatientAllergiesRepository _patientAllergiesRepository;
         private readonly IPatientRepository _patientRepository;
+        private readonly IConfirmEmailService _confirmEmailService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public PatientProfileService(IChronicDiseasesRepository chronicDiseasesRepository, ICurrentMedicationRepository currentMedicationRepository, IPatientAllergiesRepository patientAllergiesRepository, IPatientRepository patientRepository)
+        public PatientProfileService(IChronicDiseasesRepository chronicDiseasesRepository, ICurrentMedicationRepository currentMedicationRepository, IPatientAllergiesRepository patientAllergiesRepository, IPatientRepository patientRepository, IConfirmEmailService confirmEmailService, UserManager<ApplicationUser> userManager)
         {
             _chronicDiseasesRepository = chronicDiseasesRepository;
             _currentMedicationRepository = currentMedicationRepository;
             _patientAllergiesRepository = patientAllergiesRepository;
             _patientRepository = patientRepository;
+            _confirmEmailService = confirmEmailService;
+            _userManager = userManager;
         }
 
         public async Task<ReturnBase<bool>> CreatePatientProfileAsync(List<string> ChronicDiseases, List<string> CurrentMedication, List<string> Allergies, string patientId)
@@ -89,6 +94,8 @@ namespace MedScanAI.Service.Implementation
                     FullName = patient?.FullName ?? "",
                     Email = patient?.Email ?? "",
                     PhoneNumber = patient?.PhoneNumber ?? "",
+                    Gender = patient.Gender,
+                    DateOfBirth = patient.DateOfBirth,
                     ChronicDiseases = chronicDiseasesResult.Select(cd => cd.Name).ToList(),
                     CurrentMedication = currentMedicationsResult.Select(cm => cm.Name).ToList(),
                     Allergies = allergiesResult.Select(a => a.Name).ToList()
@@ -99,6 +106,67 @@ namespace MedScanAI.Service.Implementation
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<GetPatientProfileResponse>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+        public async Task<ReturnBase<bool>> UpdatePatientProfileAsync(Patient patient)
+        {
+            var transaction = await _patientRepository.BeginTransactionAsync();
+            try
+            {
+                var currentPatientResult = await _patientRepository.GetPatientAsync(patient.Id);
+
+                if (!currentPatientResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(currentPatientResult.Message);
+
+
+                var updateResult = await _patientRepository.UpdateAsync(patient);
+
+                if (!updateResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return ReturnBaseHandler.Failed<bool>(updateResult.Message);
+                }
+
+                var user = await _userManager.FindByIdAsync(patient.Id);
+
+                if (user is null)
+                    return ReturnBaseHandler.Failed<bool>("User not found.");
+
+                // Update user details
+                user.UserName = patient.FullName;
+                user.NormalizedUserName = patient.FullName.ToUpper();
+                user.Email = patient.Email;
+                user.NormalizedEmail = patient.Email.ToUpper();
+                user.PhoneNumber = patient.PhoneNumber;
+                user.UpdatedAt = DateTime.UtcNow;
+
+
+                var updateUserResult = await _userManager.UpdateAsync(user);
+
+
+                if (!updateUserResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return ReturnBaseHandler.Failed<bool>("Failed to update user details.");
+                }
+
+
+                // Check if email changed
+                if (currentPatientResult.Data is not null && currentPatientResult.Data.Email != patient.Email)
+                {
+                    var sendEmailResult = await _confirmEmailService.SendConfirmationEmailAsync(user!);
+
+                    while (!sendEmailResult.Succeeded)
+                        sendEmailResult = await _confirmEmailService.SendConfirmationEmailAsync(user!);
+                }
+
+                await transaction.CommitAsync();
+                return ReturnBaseHandler.Success(true);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
             }
         }
     }

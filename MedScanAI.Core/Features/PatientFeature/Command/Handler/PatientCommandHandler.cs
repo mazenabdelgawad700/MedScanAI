@@ -1,18 +1,23 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 using MedScanAI.Core.Features.PatientFeature.Command.Model;
+using MedScanAI.Domain.Entities;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
 
 namespace MedScanAI.Core.Features.PatientFeature.Command.Handler
 {
     public class PatientCommandHandler :
-        IRequestHandler<CreatePatientProfileCommand, ReturnBase<bool>>
+        IRequestHandler<CreatePatientProfileCommand, ReturnBase<bool>>,
+        IRequestHandler<UpdatePatientProfileCommand, ReturnBase<bool>>
     {
         private readonly IPatientProfileService _patientProfileService;
+        private readonly IMapper _mapper;
 
-        public PatientCommandHandler(IPatientProfileService patientProfileService)
+        public PatientCommandHandler(IPatientProfileService patientProfileService, IMapper mapper)
         {
             _patientProfileService = patientProfileService;
+            _mapper = mapper;
         }
 
 
@@ -32,6 +37,23 @@ namespace MedScanAI.Core.Features.PatientFeature.Command.Handler
 
 
                 return ReturnBaseHandler.Success(true, result.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(UpdatePatientProfileCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var mappedResult = _mapper.Map<Patient>(request);
+                var updateProfileResult = await _patientProfileService.UpdatePatientProfileAsync(mappedResult);
+                if (!updateProfileResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(updateProfileResult.Message);
+
+                return ReturnBaseHandler.Success(true, updateProfileResult.Message);
             }
             catch (Exception ex)
             {
