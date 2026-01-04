@@ -8,8 +8,14 @@
         public string PhoneNumber { get; set; }
         public string Gender { get; set; }
         public DateOnly DateOfBirth { get; set; }
-        public List<string> ChronicDiseases { get; set; }
-        public List<string> Allergies { get; set; }
-        public List<string> CurrentMedication { get; set; }
+        public List<PatientHistoryResponse> ChronicDiseases { get; set; }
+        public List<PatientHistoryResponse> Allergies { get; set; }
+        public List<PatientHistoryResponse> CurrentMedication { get; set; }
+    }
+    public class PatientHistoryResponse
+    {
+        public string PatientId { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

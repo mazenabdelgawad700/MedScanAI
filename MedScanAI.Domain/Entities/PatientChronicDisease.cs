@@ -18,7 +18,7 @@ namespace MedScanAI.Domain.Entities
         public string Name { get; set; }
 
         [MaxLength(500)]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public Patient Patient { get; set; }

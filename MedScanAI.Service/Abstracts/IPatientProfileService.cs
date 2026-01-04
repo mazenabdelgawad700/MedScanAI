@@ -10,5 +10,11 @@ namespace MedScanAI.Service.Abstracts
 
         Task<ReturnBase<GetPatientProfileResponse>> GetPatientProfileAsync(string patientId);
         Task<ReturnBase<bool>> UpdatePatientProfileAsync(Patient patient);
+        Task<ReturnBase<bool>> UpdatePatientAllergyAsync(PatientAllergy patientAllergy);
+        Task<ReturnBase<bool>> UpdatePatientChronicDiseaseAsync(PatientChronicDisease patientChronicDisease);
+        Task<ReturnBase<bool>> UpdatePatientCurrentMedicationAsync(PatientCurrentMedication patientCurrentMedication);
+        Task<ReturnBase<bool>> DeletePatientAllergyAsync(int Id);
+        Task<ReturnBase<bool>> DeletePatientChronicDiseaseAsync(int Id);
+        Task<ReturnBase<bool>> DeletePatientCurrentMedicationAsync(int Id);
     }
 }

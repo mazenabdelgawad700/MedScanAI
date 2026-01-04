@@ -36,5 +36,53 @@ namespace MedScanAI.API.Controllers
             ReturnBase<bool> response = await Mediator.Send(command);
             return ReturnResult(response);
         }
+
+        [HttpPut]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> UpdateCurrentMedication([FromBody] UpdatePatientCurrentMedicationCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return ReturnResult(response);
+        }
+
+        [HttpPut]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> UpdateAllergy([FromBody] UpdatePatientAllergyCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return ReturnResult(response);
+        }
+
+        [HttpPut]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> UpdateChronicDisease([FromBody] UpdatePatientChronicDiseaseCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return ReturnResult(response);
+        }
+
+        [HttpDelete]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> DeleteChronicDisease([FromBody] DeletePatientChronicDiseaseCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return ReturnResult(response);
+        }
+
+        [HttpDelete]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> DeleteCurrentMedication([FromBody] DeletePatientCurrentMedicationCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return ReturnResult(response);
+        }
+
+        [HttpDelete]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> DeleteAllergy([FromBody] DeletePatientAllergyCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return ReturnResult(response);
+        }
     }
 }
