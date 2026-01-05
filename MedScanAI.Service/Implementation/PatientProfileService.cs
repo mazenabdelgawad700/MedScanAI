@@ -76,57 +76,6 @@ namespace MedScanAI.Service.Implementation
             }
         }
 
-        public async Task<ReturnBase<bool>> DeletePatientAllergyAsync(int Id)
-        {
-            try
-            {
-                var deleteResult = await _patientAllergiesRepository.DeleteAsync(Id);
-                if (!deleteResult.Succeeded)
-                {
-                    return ReturnBaseHandler.Failed<bool>(deleteResult.Message);
-                }
-                return ReturnBaseHandler.Success(true, "Patient allergy deleted successfully");
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
-            }
-        }
-
-        public async Task<ReturnBase<bool>> DeletePatientChronicDiseaseAsync(int Id)
-        {
-            try
-            {
-                var deleteResult = await _chronicDiseasesRepository.DeleteAsync(Id);
-                if (!deleteResult.Succeeded)
-                {
-                    return ReturnBaseHandler.Failed<bool>(deleteResult.Message);
-                }
-                return ReturnBaseHandler.Success(true, "Patient chronic disease deleted successfully");
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
-            }
-        }
-
-        public async Task<ReturnBase<bool>> DeletePatientCurrentMedicationAsync(int Id)
-        {
-            try
-            {
-                var deleteResult = await _currentMedicationRepository.DeleteAsync(Id);
-                if (!deleteResult.Succeeded)
-                {
-                    return ReturnBaseHandler.Failed<bool>(deleteResult.Message);
-                }
-                return ReturnBaseHandler.Success(true, "Patient current medication deleted successfully");
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
-            }
-        }
-
         public async Task<ReturnBase<GetPatientProfileResponse>> GetPatientProfileAsync(string patientId)
         {
             try
@@ -167,57 +116,6 @@ namespace MedScanAI.Service.Implementation
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<GetPatientProfileResponse>(ex.InnerException?.Message ?? ex.Message);
-            }
-        }
-
-        public async Task<ReturnBase<bool>> UpdatePatientAllergyAsync(PatientAllergy patientAllergy)
-        {
-            try
-            {
-                var updateResult = await _patientAllergiesRepository.UpdateAsync(patientAllergy);
-                if (!updateResult.Succeeded)
-                {
-                    return ReturnBaseHandler.Failed<bool>(updateResult.Message);
-                }
-                return ReturnBaseHandler.Success(true);
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
-            }
-        }
-
-        public async Task<ReturnBase<bool>> UpdatePatientChronicDiseaseAsync(PatientChronicDisease patientChronicDisease)
-        {
-            try
-            {
-                var updateResult = await _chronicDiseasesRepository.UpdateAsync(patientChronicDisease);
-                if (!updateResult.Succeeded)
-                {
-                    return ReturnBaseHandler.Failed<bool>(updateResult.Message);
-                }
-                return ReturnBaseHandler.Success(true);
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
-            }
-        }
-
-        public async Task<ReturnBase<bool>> UpdatePatientCurrentMedicationAsync(PatientCurrentMedication patientCurrentMedication)
-        {
-            try
-            {
-                var updateResult = await _currentMedicationRepository.UpdateAsync(patientCurrentMedication);
-                if (!updateResult.Succeeded)
-                {
-                    return ReturnBaseHandler.Failed<bool>(updateResult.Message);
-                }
-                return ReturnBaseHandler.Success(true);
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
             }
         }
 

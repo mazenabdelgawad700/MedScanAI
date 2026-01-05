@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using MedScanAI.Shared.Base;
 
-namespace MedScanAI.Core.Features.PatientFeature.Command.Model
+namespace MedScanAI.Core.Features.AllergyFeature.Command.Model
 {
     public class DeletePatientAllergyCommand : IRequest<ReturnBase<bool>>
     {

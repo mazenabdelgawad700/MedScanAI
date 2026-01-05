@@ -2,7 +2,7 @@
 using MedScanAI.Shared.Base;
 using MedScanAI.Shared.SharedRequest;
 
-namespace MedScanAI.Core.Features.PatientFeature.Command.Model
+namespace MedScanAI.Core.Features.AllergyFeature.Command.Model
 {
     public class UpdatePatientAllergyCommand : IRequest<ReturnBase<bool>>
     {

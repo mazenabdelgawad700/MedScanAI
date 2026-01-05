@@ -50,11 +50,11 @@ namespace MedScanAI.API
             {
                 options.AddSlidingWindowLimiter("SlidingWindowPolicy", opt =>
                 {
-                    opt.Window = TimeSpan.FromSeconds(40);
-                    opt.PermitLimit = 10;
-                    opt.QueueLimit = 10;
+                    opt.Window = TimeSpan.FromSeconds(1);
+                    opt.PermitLimit = 1000;
+                    opt.QueueLimit = 1000;
                     opt.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
-                    opt.SegmentsPerWindow = 4;
+                    opt.SegmentsPerWindow = 50;
                 }).RejectionStatusCode = 429;
             });
 

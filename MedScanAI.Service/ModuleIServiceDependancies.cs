@@ -14,6 +14,9 @@ namespace MedScanAI.Service
             services.AddTransient<IDoctorService, DoctorService>();
             services.AddTransient<IPatientProfileService, PatientProfileService>();
             services.AddTransient<IAppointmentService, AppointmentService>();
+            services.AddTransient<IChronicDiseaseService, ChronicDiseaseService>();
+            services.AddTransient<IAllergyService, AllergyService>();
+            services.AddTransient<ICurrentMedicationService, CurrentMedicationService>();
 
             return services;
         }
