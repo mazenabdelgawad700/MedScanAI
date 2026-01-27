@@ -1,6 +1,7 @@
 ﻿using MedScanAI.API.Base;
 using MedScanAI.Core.Features.PatientFeature.Command.Model;
 using MedScanAI.Core.Features.PatientFeature.Query.Model;
+using MedScanAI.Core.Features.PatientFeature.Query.Response;
 using MedScanAI.Shared.Base;
 using MedScanAI.Shared.SharedResponse;
 using Microsoft.AspNetCore.Authorization;
@@ -34,6 +35,14 @@ namespace MedScanAI.API.Controllers
         public async Task<IActionResult> UpdateProfile([FromBody] UpdatePatientProfileCommand command)
         {
             ReturnBase<bool> response = await Mediator.Send(command);
+            return ReturnResult(response);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPatientsCount()
+        {
+            ReturnBase<GetPatientsCountResponse> response =
+                await Mediator.Send(new GetPatientsCountQuery());
             return ReturnResult(response);
         }
     }

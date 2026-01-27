@@ -33,5 +33,17 @@ namespace MedScanAI.Infrastructure.Repositories
                 return ReturnBaseHandler.Failed<Patient>(ex.InnerException?.Message ?? ex.Message);
             }
         }
+        public async Task<ReturnBase<int>> GetPatientsCountAsync()
+        {
+            try
+            {
+                var count = await _dbSet.CountAsync();
+                return ReturnBaseHandler.Success(count);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<int>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
     }
 }

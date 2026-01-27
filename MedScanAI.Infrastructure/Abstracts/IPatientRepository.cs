@@ -7,5 +7,6 @@ namespace MedScanAI.Infrastructure.Abstracts
     public interface IPatientRepository : IBaseRepository<Patient>
     {
         Task<ReturnBase<Patient>> GetPatientAsync(string id);
+        Task<ReturnBase<int>> GetPatientsCountAsync();
     }
 }

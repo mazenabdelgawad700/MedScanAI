@@ -23,7 +23,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Features\AppointmentFeature\Query\Response\" />
-	  <Folder Include="Features\PatientFeature\Query\Response\" />
 	  <Folder Include="Wrappers\" />
 	</ItemGroup>
 	
