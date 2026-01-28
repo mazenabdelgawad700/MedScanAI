@@ -17,7 +17,30 @@ namespace MedScanAI.Service.Implementation
             _appointmentRepository = appointmentRepository;
             _patientRepository = patientRepository;
         }
+        public async Task<ReturnBase<bool>> CancelAppointmentAsync(int appointmentId)
+        {
+            try
+            {
+                var appointmentResult = await _appointmentRepository.GetByIdAsync(appointmentId);
 
+                if (!appointmentResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(appointmentResult.Message);
+
+                if (appointmentResult.Data!.Status != "Pending")
+                    return ReturnBaseHandler.Failed<bool>("Only pending appointments can be cancelled.");
+
+                var cancelAppointmentResult = await _appointmentRepository.CancelAppointmentAsync(appointmentId);
+
+                if (!cancelAppointmentResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(cancelAppointmentResult.Message);
+
+                return ReturnBaseHandler.Success(cancelAppointmentResult.Data, cancelAppointmentResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
         public async Task<ReturnBase<bool>> CompleteAppointmentAsync(int appointmentId)
         {
             try

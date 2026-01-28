@@ -19,7 +19,27 @@ namespace MedScanAI.Infrastructure.Repositories
             _doctors = _dbContext.Set<Doctor>();
             _appointments = _dbContext.Set<Appointment>();
         }
+        public async Task<ReturnBase<bool>> CancelAppointmentAsync(int appointmentId)
+        {
+            try
+            {
+                var appointment = await _appointments.Where(x => x.Id == appointmentId).FirstOrDefaultAsync();
+                if (appointment is null)
+                    return ReturnBaseHandler.Failed<bool>("Failed to retrieve appointment");
 
+                appointment.Status = "Cancelled";
+
+                _appointments.Update(appointment);
+
+                await _dbContext.SaveChangesAsync();
+
+                return ReturnBaseHandler.Success(true, "Appointment cancelled successfully");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
         public async Task<ReturnBase<bool>> CompleteAppointmentAsync(int appointmentId)
         {
             try
@@ -151,7 +171,6 @@ namespace MedScanAI.Infrastructure.Repositories
                     ex.InnerException?.Message ?? ex.Message);
             }
         }
-
         public async Task<ReturnBase<List<Appointment>>> GetPatientAppointmentsAsync(string patientId)
         {
             try
@@ -178,6 +197,7 @@ namespace MedScanAI.Infrastructure.Repositories
                     .Include(a => a.Doctor)
                     .Include(a => a.Patient)
                     .Where(a => a.Date.Date == today)
+                    .Where(a => a.Status != "Cancelled")
                     .Select(a => new GetTodayAppointmentsResponse
                     {
                         Id = a.Id,
@@ -199,6 +219,5 @@ namespace MedScanAI.Infrastructure.Repositories
                 );
             }
         }
-
     }
 }

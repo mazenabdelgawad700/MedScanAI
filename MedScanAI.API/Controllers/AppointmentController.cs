@@ -58,5 +58,13 @@ namespace MedScanAI.API.Controllers
             var result = await Mediator.Send(query);
             return ReturnResult(result);
         }
+
+        [HttpPut]
+        [Authorize(Roles = "Patient, Admin")]
+        public async Task<IActionResult> Cancel([FromBody] CancelAppointmentCommand command)
+        {
+            var result = await Mediator.Send(command);
+            return ReturnResult(result);
+        }
     }
 }

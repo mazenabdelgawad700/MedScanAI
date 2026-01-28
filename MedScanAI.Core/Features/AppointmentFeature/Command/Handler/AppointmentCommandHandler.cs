@@ -9,7 +9,8 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Command.Handler
     public class AppointmentCommandHandler :
         IRequestHandler<MakeAppointmentCommand, ReturnBase<bool>>,
         IRequestHandler<ConfirmAppointmentCommand, ReturnBase<bool>>,
-        IRequestHandler<CompleteAppointmentCommand, ReturnBase<bool>>
+        IRequestHandler<CompleteAppointmentCommand, ReturnBase<bool>>,
+        IRequestHandler<CancelAppointmentCommand, ReturnBase<bool>>
     {
 
         private readonly IAppointmentService _appointmentService;
@@ -66,6 +67,23 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Command.Handler
                     return ReturnBaseHandler.Failed<bool>(completeResult.Message);
 
                 return ReturnBaseHandler.Success(completeResult.Data, completeResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(CancelAppointmentCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var cancelResult = await _appointmentService.CancelAppointmentAsync(request.AppointmentId);
+
+                if (!cancelResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(cancelResult.Message);
+
+                return ReturnBaseHandler.Success(cancelResult.Data, cancelResult.Message);
             }
             catch (Exception ex)
             {
