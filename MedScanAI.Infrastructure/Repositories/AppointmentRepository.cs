@@ -3,7 +3,6 @@ using MedScanAI.Infrastructure.Abstracts;
 using MedScanAI.Infrastructure.Context;
 using MedScanAI.Infrastructure.RepositoryBase;
 using MedScanAI.Shared.Base;
-using MedScanAI.Shared.SahredResponse;
 using MedScanAI.Shared.SharedResponse;
 using Microsoft.EntityFrameworkCore;
 
@@ -150,6 +149,23 @@ namespace MedScanAI.Infrastructure.Repositories
             {
                 return ReturnBaseHandler.Failed<List<GetDoctorsForAppointmentsResponse>>(
                     ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<List<Appointment>>> GetPatientAppointmentsAsync(string patientId)
+        {
+            try
+            {
+                var appointments = await _appointments.Where(x => x.PatientId == patientId).ToListAsync();
+
+                if (appointments is null)
+                    return ReturnBaseHandler.Failed<List<Appointment>>("Failed to retreive patients appointments");
+
+                return ReturnBaseHandler.Success(appointments);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<List<Appointment>>(ex.InnerException?.Message ?? ex.Message);
             }
         }
         public async Task<ReturnBase<List<GetTodayAppointmentsResponse>>> GetTodayAppointmentsAsync()

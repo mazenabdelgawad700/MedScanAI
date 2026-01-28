@@ -4,7 +4,8 @@ using MedScanAI.Shared.SharedResponse;
 
 namespace MedScanAI.Core.Features.AppointmentFeature.Query.Model
 {
-    public class GetDoctorsForAppointmentsQuery : IRequest<ReturnBase<List<GetDoctorsForAppointmentsResponse>>>
+    public class GetPatientAppointmentsQuery : IRequest<ReturnBase<List<GetPatientAppointmentsResponse>>>
     {
+        public string PatientId { get; set; }
     }
 }

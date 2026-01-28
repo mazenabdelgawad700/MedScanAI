@@ -50,5 +50,13 @@ namespace MedScanAI.API.Controllers
             var result = await Mediator.Send(command);
             return ReturnResult(result);
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Patient, Admin")]
+        public async Task<IActionResult> GetPatientAppointments([FromQuery] GetPatientAppointmentsQuery query)
+        {
+            var result = await Mediator.Send(query);
+            return ReturnResult(result);
+        }
     }
 }

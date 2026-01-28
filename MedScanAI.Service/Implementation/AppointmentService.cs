@@ -2,7 +2,6 @@
 using MedScanAI.Infrastructure.Abstracts;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
-using MedScanAI.Shared.SahredResponse;
 using MedScanAI.Shared.SharedResponse;
 using Microsoft.EntityFrameworkCore;
 
@@ -68,6 +67,22 @@ namespace MedScanAI.Service.Implementation
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<List<GetDoctorsForAppointmentsResponse>>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+        public async Task<ReturnBase<List<Appointment>>> GetPatientAppointmentsAsync(string patientId)
+        {
+            try
+            {
+                var appointmentsResult = await _appointmentRepository.GetPatientAppointmentsAsync(patientId);
+
+                if (!appointmentsResult.Succeeded)
+                    return ReturnBaseHandler.Failed<List<Appointment>>(appointmentsResult.Message);
+
+                return ReturnBaseHandler.Success(appointmentsResult.Data!);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<List<Appointment>>(ex.InnerException?.Message ?? ex.Message);
             }
         }
         public async Task<ReturnBase<List<GetTodayAppointmentsResponse>>> GetTodaysAppointmentsAsync()

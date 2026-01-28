@@ -3,14 +3,14 @@ using MediatR;
 using MedScanAI.Core.Features.AppointmentFeature.Query.Model;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
-using MedScanAI.Shared.SahredResponse;
 using MedScanAI.Shared.SharedResponse;
 
 namespace MedScanAI.Core.Features.AppointmentFeature.Query.Handler
 {
     public class AppointmentQueryHandler :
         IRequestHandler<GetDoctorsForAppointmentsQuery, ReturnBase<List<GetDoctorsForAppointmentsResponse>>>,
-        IRequestHandler<GetTodayAppointmentsQuery, ReturnBase<List<GetTodayAppointmentsResponse>>>
+        IRequestHandler<GetTodayAppointmentsQuery, ReturnBase<List<GetTodayAppointmentsResponse>>>,
+        IRequestHandler<GetPatientAppointmentsQuery, ReturnBase<List<GetPatientAppointmentsResponse>>>
     {
 
         private readonly IAppointmentService _appointmentsService;
@@ -57,6 +57,25 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Query.Handler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<List<GetTodayAppointmentsResponse>>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<List<GetPatientAppointmentsResponse>>> Handle(GetPatientAppointmentsQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var appointmentsResult = await _appointmentsService.GetPatientAppointmentsAsync(request.PatientId);
+
+                if (!appointmentsResult.Succeeded)
+                    return ReturnBaseHandler.Failed<List<GetPatientAppointmentsResponse>>(appointmentsResult.Message);
+
+                var mappedResult = _mapper.Map<List<GetPatientAppointmentsResponse>>(appointmentsResult.Data);
+
+                return ReturnBaseHandler.Success(mappedResult, appointmentsResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<List<GetPatientAppointmentsResponse>>(ex.InnerException?.Message ?? ex.Message);
             }
         }
     }
