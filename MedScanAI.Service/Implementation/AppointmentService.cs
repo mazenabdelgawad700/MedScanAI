@@ -2,7 +2,9 @@
 using MedScanAI.Infrastructure.Abstracts;
 using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
+using MedScanAI.Shared.Hubs;
 using MedScanAI.Shared.SharedResponse;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedScanAI.Service.Implementation
@@ -11,12 +13,18 @@ namespace MedScanAI.Service.Implementation
     {
         private readonly IAppointmentRepository _appointmentRepository;
         private readonly IPatientRepository _patientRepository;
+        private readonly IHubContext<AppointmentHub> _hubContext;
 
-        public AppointmentService(IAppointmentRepository appointmentRepository, IPatientRepository patientRepository)
+        public AppointmentService(
+            IAppointmentRepository appointmentRepository,
+            IPatientRepository patientRepository,
+            IHubContext<AppointmentHub> hubContext)
         {
             _appointmentRepository = appointmentRepository;
             _patientRepository = patientRepository;
+            _hubContext = hubContext;
         }
+
         public async Task<ReturnBase<bool>> CancelAppointmentAsync(int appointmentId)
         {
             try
@@ -34,6 +42,16 @@ namespace MedScanAI.Service.Implementation
                 if (!cancelAppointmentResult.Succeeded)
                     return ReturnBaseHandler.Failed<bool>(cancelAppointmentResult.Message);
 
+                // Fire SignalR event for appointment cancellation
+                await _hubContext.Clients.All.SendAsync("AppointmentCancelled", new
+                {
+                    AppointmentId = appointmentId,
+                    PatientId = appointmentResult.Data.PatientId,
+                    DoctorId = appointmentResult.Data.DoctorId,
+                    AppointmentDate = appointmentResult.Data.Date,
+                    Message = "Appointment has been cancelled"
+                });
+
                 return ReturnBaseHandler.Success(cancelAppointmentResult.Data, cancelAppointmentResult.Message);
             }
             catch (Exception ex)
@@ -41,6 +59,7 @@ namespace MedScanAI.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
             }
         }
+
         public async Task<ReturnBase<bool>> CompleteAppointmentAsync(int appointmentId)
         {
             try
@@ -60,6 +79,7 @@ namespace MedScanAI.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
             }
         }
+
         public async Task<ReturnBase<bool>> ConfirmAppointmentAsync(int appointmentId)
         {
             try
@@ -78,13 +98,13 @@ namespace MedScanAI.Service.Implementation
             {
                 return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
             }
-
         }
-        public async Task<ReturnBase<List<GetDoctorsForAppointmentsResponse>>> GetDoctorsForAppointmentsAsync()
+
+        public async Task<ReturnBase<List<GetDoctorsForAppointmentsResponse>>> GetDoctorsForAppointmentsAsync(string? patientId)
         {
             try
             {
-                var doctors = await _appointmentRepository.GetDoctorsForAppointmentsAsync();
+                var doctors = await _appointmentRepository.GetDoctorsForAppointmentsAsync(patientId);
                 return ReturnBaseHandler.Success(doctors.Data!);
             }
             catch (Exception ex)
@@ -92,6 +112,7 @@ namespace MedScanAI.Service.Implementation
                 return ReturnBaseHandler.Failed<List<GetDoctorsForAppointmentsResponse>>(ex.InnerException?.Message ?? ex.Message);
             }
         }
+
         public async Task<ReturnBase<List<Appointment>>> GetPatientAppointmentsAsync(string patientId)
         {
             try
@@ -108,6 +129,7 @@ namespace MedScanAI.Service.Implementation
                 return ReturnBaseHandler.Failed<List<Appointment>>(ex.InnerException?.Message ?? ex.Message);
             }
         }
+
         public async Task<ReturnBase<List<GetTodayAppointmentsResponse>>> GetTodaysAppointmentsAsync()
         {
             try
@@ -120,6 +142,7 @@ namespace MedScanAI.Service.Implementation
                 return ReturnBaseHandler.Failed<List<GetTodayAppointmentsResponse>>(ex.InnerException?.Message ?? ex.Message);
             }
         }
+
         public async Task<ReturnBase<bool>> MakeAppointmentAsync(Appointment appointment)
         {
             try
@@ -138,6 +161,19 @@ namespace MedScanAI.Service.Implementation
 
                 if (!makeAppointmentResult.Succeeded)
                     return ReturnBaseHandler.Failed<bool>(makeAppointmentResult.Message);
+
+                // Fire SignalR event for new appointment creation
+                await _hubContext.Clients.All.SendAsync("AppointmentCreated", new
+                {
+                    AppointmentId = appointment.Id,
+                    PatientId = appointment.PatientId,
+                    PatientName = appointment.PatientName,
+                    DoctorId = appointment.DoctorId,
+                    AppointmentDate = appointment.Date,
+                    Reason = appointment.Reason,
+                    Status = appointment.Status,
+                    Message = "New appointment has been created"
+                });
 
                 return ReturnBaseHandler.Success(true, "Appointment made successfully.");
             }

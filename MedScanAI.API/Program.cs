@@ -2,6 +2,7 @@ using MedScanAI.Core;
 using MedScanAI.Infrastructure;
 using MedScanAI.Infrastructure.Context;
 using MedScanAI.Service;
+using MedScanAI.Shared.Hubs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -58,6 +59,8 @@ namespace MedScanAI.API
                 }).RejectionStatusCode = 429;
             });
 
+            builder.Services.AddSignalR();
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -77,6 +80,7 @@ namespace MedScanAI.API
 
 
             app.MapControllers();
+            app.MapHub<AppointmentHub>("/appointmentHub");
 
             using (var scope = app.Services.CreateScope())
             {

@@ -26,7 +26,7 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Query.Handler
         {
             try
             {
-                var doctorsResult = await _appointmentsService.GetDoctorsForAppointmentsAsync();
+                var doctorsResult = await _appointmentsService.GetDoctorsForAppointmentsAsync(request.PatientId);
 
                 if (!doctorsResult.Succeeded)
                     return ReturnBaseHandler.Failed<List<GetDoctorsForAppointmentsResponse>>(doctorsResult.Message);

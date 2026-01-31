@@ -6,5 +6,6 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Query.Model
 {
     public class GetDoctorsForAppointmentsQuery : IRequest<ReturnBase<List<GetDoctorsForAppointmentsResponse>>>
     {
+        public string? PatientId { get; set; }
     }
 }

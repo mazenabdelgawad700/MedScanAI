@@ -82,7 +82,7 @@ namespace MedScanAI.Infrastructure.Repositories
                 return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
             }
         }
-        public async Task<ReturnBase<List<GetDoctorsForAppointmentsResponse>>> GetDoctorsForAppointmentsAsync()
+        public async Task<ReturnBase<List<GetDoctorsForAppointmentsResponse>>> GetDoctorsForAppointmentsAsync(string? patientId)
         {
             try
             {
@@ -90,16 +90,60 @@ namespace MedScanAI.Infrastructure.Repositories
                 var todayDate = DateTime.Today;
                 var currentTime = DateTime.Now.TimeOfDay;
 
-                // Get all doctors who are active and available right now
-                var doctors = await _dbContext.Doctors
-                    .Include(d => d.Specialization)
-                    .Include(d => d.Schedules)
-                    .Where(d => d.IsActive)
-                    .Where(d => d.Schedules.Any(s =>
-                        s.DayOfWeek == today &&
-                        s.IsAvailable &&
-                        s.StartTime <= currentTime &&
-                        s.EndTime >= currentTime))
+                Appointment? recentAppointment = null;
+
+                if (!string.IsNullOrEmpty(patientId))
+                {
+                    recentAppointment = await _dbContext.Appointments
+                        .Where(a => a.PatientId == patientId)
+                        .OrderBy(a => a.Date)
+                        .Where(a => a.Date.Date == todayDate)
+                        .LastOrDefaultAsync();
+                }
+
+                // Get doctors the patient already has appointments with today (non-cancelled)
+                var doctorsWithPatientAppointmentsToday = await _dbContext.Appointments
+                    .Where(a => a.PatientId == patientId && a.Date.Date == todayDate && a.Status != "Cancelled")
+                    .Select(a => a.DoctorId)
+                    .Distinct()
+                    .ToListAsync();
+
+                List<Doctor> doctors;
+                if (recentAppointment is null || recentAppointment.Status == "Cancelled")
+                {
+                    doctors = await _dbContext.Doctors
+                                .Include(d => d.Specialization)
+                                .Include(d => d.Schedules)
+                                .Where(d => d.IsActive)
+                                .Where(d => !doctorsWithPatientAppointmentsToday.Contains(d.Id))
+                                .Where(d => d.Schedules.Any(s =>
+                                    s.DayOfWeek == today &&
+                                    s.IsAvailable &&
+                                    s.StartTime <= currentTime &&
+                                    s.EndTime >= currentTime))
+                                .ToListAsync();
+                }
+
+                else
+                {
+                    doctors = await _dbContext.Doctors
+                                .Include(d => d.Specialization)
+                                .Include(d => d.Schedules)
+                                .Where(d => d.IsActive)
+                                .Where(d => d.Id != recentAppointment.DoctorId) // Exclude last doctor
+                                .Where(d => !doctorsWithPatientAppointmentsToday.Contains(d.Id))
+                                .Where(d => d.Schedules.Any(s =>
+                                    s.DayOfWeek == today &&
+                                    s.IsAvailable &&
+                                    s.StartTime <= currentTime &&
+                                    s.EndTime >= currentTime))
+                                .ToListAsync();
+                }
+
+                // Get patient's appointments for today (excluding cancelled)
+                var patientAppointmentsToday = await _dbContext.Appointments
+                    .Where(a => a.PatientId == patientId && a.Date.Date == todayDate && a.Status != "Cancelled")
+                    .OrderBy(a => a.Date)
                     .ToListAsync();
 
                 var doctorResponses = new List<GetDoctorsForAppointmentsResponse>();
@@ -110,38 +154,32 @@ namespace MedScanAI.Infrastructure.Repositories
                     var schedule = doctor.Schedules.FirstOrDefault(s => s.DayOfWeek == today && s.IsAvailable);
                     if (schedule == null) continue;
 
-                    // Get all appointments for today for this doctor
+                    // Get all non-cancelled appointments for today for this doctor
                     var todaysAppointments = await _dbContext.Appointments
-                        .Where(a => a.DoctorId == doctor.Id && a.Date.Date == todayDate)
+                        .Where(a => a.DoctorId == doctor.Id && a.Date.Date == todayDate && a.Status != "Cancelled")
                         .OrderBy(a => a.Date)
                         .ToListAsync();
 
-                    // Find last appointment end time (if any)
-                    TimeSpan lastAppointmentEnd = schedule.StartTime;
-
-                    if (todaysAppointments.Any())
-                    {
-                        var lastAppointment = todaysAppointments.Last();
-                        lastAppointmentEnd = lastAppointment.Date.TimeOfDay;
-                    }
-
-                    // Generate available start times between lastAppointmentEnd and schedule.EndTime
-                    // Example: 30-minute intervals
+                    // Generate available start times from current time till end of schedule
                     var availableTimes = new List<string>();
                     var slotLength = TimeSpan.FromMinutes(30); // you can make this configurable
-                    var nextAvailable = lastAppointmentEnd;
-
-                    if (nextAvailable < currentTime)
-                        nextAvailable = currentTime;
+                    var nextAvailable = currentTime < schedule.StartTime ? schedule.StartTime : currentTime;
 
                     while (nextAvailable.Add(slotLength) <= schedule.EndTime)
                     {
-                        bool isBooked = todaysAppointments.Any(a =>
+                        // Check if doctor slot is booked (only active appointments)
+                        bool isDoctorSlotBooked = todaysAppointments.Any(a =>
                             a.Date.TimeOfDay == nextAvailable ||
                             (a.Date.TimeOfDay < nextAvailable.Add(slotLength) && a.Date.TimeOfDay > nextAvailable)
                         );
 
-                        if (!isBooked)
+                        // Check if patient has a conflicting appointment at this time (only active appointments)
+                        bool isPatientBusy = patientAppointmentsToday.Any(a =>
+                            a.Date.TimeOfDay == nextAvailable ||
+                            (a.Date.TimeOfDay < nextAvailable.Add(slotLength) && a.Date.TimeOfDay > nextAvailable)
+                        );
+
+                        if (!isDoctorSlotBooked && !isPatientBusy)
                         {
                             // Convert to 12-hour format with AM/PM for Egypt
                             availableTimes.Add(DateTime.Today
@@ -151,7 +189,6 @@ namespace MedScanAI.Infrastructure.Repositories
 
                         nextAvailable = nextAvailable.Add(slotLength);
                     }
-
 
                     doctorResponses.Add(new GetDoctorsForAppointmentsResponse
                     {
