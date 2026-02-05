@@ -92,6 +92,13 @@ namespace MedScanAI.Service.Implementation
                 if (!confirmAppointmentResult.Succeeded)
                     return ReturnBaseHandler.Failed<bool>(confirmAppointmentResult.Message);
 
+                // Fire SignalR event for appointment cancellation
+                await _hubContext.Clients.All.SendAsync("AppointmentConfirmed", new
+                {
+                    AppointmentId = appointmentId,
+                    Message = "Appointment has been confirmed"
+                });
+
                 return ReturnBaseHandler.Success(confirmAppointmentResult.Data, confirmAppointmentResult.Message);
             }
             catch (Exception ex)

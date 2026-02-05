@@ -21,6 +21,11 @@ namespace MedScanAI.Shared.Hubs
             await Clients.All.SendAsync("AppointmentCreated", appointmentData);
         }
 
+        public async Task NotifyAppointmentConfirmed(object appointmentData)
+        {
+            await Clients.All.SendAsync("AppointmentConfirmed", appointmentData);
+        }
+
         public async Task NotifyAppointmentCancelled(object appointmentData)
         {
             await Clients.All.SendAsync("AppointmentCancelled", appointmentData);

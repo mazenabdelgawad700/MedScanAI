@@ -83,7 +83,7 @@ namespace MedScanAI.Infrastructure.Repositories
                     .Include(x => x.Patient.Allergies)
                     .Include(x => x.Patient.ChronicDiseases)
                     .Include(x => x.Patient.CurrentMedications)
-                    .Where(a => a.DoctorId == doctorId && a.Date.Date == today && a.Status != "Completed")
+                    .Where(a => a.DoctorId == doctorId && a.Date.Date == today && a.Status != "Completed" && a.Status != "Cancelled" && a.Status == "Confirmed")
                     .ToListAsync();
 
                 var patientResponse = appointments.Select(a => new PatientResponse
