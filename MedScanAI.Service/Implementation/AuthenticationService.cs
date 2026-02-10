@@ -177,7 +177,28 @@ namespace MedScanAI.Service.Implementation
                 bool isPasswordCorrect = await _userManager.CheckPasswordAsync(user, password);
 
                 if (!isPasswordCorrect)
-                    return ReturnBaseHandler.Failed<string>("Wrong Email Or Password");
+                {
+                    var attemptCount = await _userManager.GetAccessFailedCountAsync(user);
+                    if (attemptCount == 4)
+                    {
+                        if (user.LockoutEnabled)
+                            return ReturnBaseHandler.Failed<string>($"Your account has been locked due to multiple failed login attempts. Please try again at {user.LockoutEnd?.ToLocalTime().ToString("f")}");
+
+                        user.LockoutEnabled = true;
+                        user.LockoutEnd = DateTime.UtcNow.AddMinutes(15);
+                        await _userManager.UpdateAsync(user);
+
+                        return ReturnBaseHandler.Failed<string>($"Your account has been locked due to multiple failed login attempts. Please try again at {user.LockoutEnd?.ToLocalTime().ToString("f")}");
+                    }
+                    await _userManager.AccessFailedAsync(user);
+
+                    return ReturnBaseHandler.Failed<string>($"Wrong Email Or Password. {5 - user.AccessFailedCount} trials left");
+                }
+
+                if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
+                {
+                    return ReturnBaseHandler.Failed<string>($"Your account is locked until {user.LockoutEnd.Value.ToLocalTime().ToString("f")}");
+                }
 
                 string jwtId = Guid.NewGuid().ToString();
                 string token = await GenerateJwtToken(user, jwtId);
