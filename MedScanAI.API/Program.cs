@@ -60,6 +60,8 @@ namespace MedScanAI.API
             });
 
             builder.Services.AddSignalR();
+            builder.Services.AddHttpClient();
+
 
             var app = builder.Build();
 
