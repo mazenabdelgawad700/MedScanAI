@@ -10,5 +10,7 @@ namespace MedScanAI.Service.Abstracts
         Task<ReturnBase<ModelResponse>> GetBreastCancerModelResponseAsync(IFormFile image, string userRole);
         Task<ReturnBase<ModelResponse>> GetDermatologyModelResponseAsync(IFormFile image, string userRole);
         Task<ReturnBase<ModelResponse>> GetXRayModelResponseAsync(IFormFile image, string userRole);
+        Task<ReturnBase<LabModelResponse>> GetLabResultsModelResponseAsync(IFormFile image, string userRole);
+        Task<ReturnBase<ChatbotResponse>> GetChatbotResponseAsync(string message, string userRole);
     }
 }

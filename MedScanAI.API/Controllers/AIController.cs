@@ -41,5 +41,21 @@ namespace MedScanAI.API.Controllers
             var result = await Mediator.Send(query);
             return ReturnResult(result);
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Patient,Doctor")]
+        public async Task<IActionResult> GetLabResults([FromForm] LabResultsModelQuery query)
+        {
+            var result = await Mediator.Send(query);
+            return ReturnResult(result);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Patient,Doctor")]
+        public async Task<IActionResult> GetChatbotResponse([FromBody] ChatbotQuery query)
+        {
+            var result = await Mediator.Send(query);
+            return ReturnResult(result);
+        }
     }
 }
