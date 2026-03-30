@@ -1,4 +1,5 @@
 ﻿using MedScanAI.API.Base;
+using MedScanAI.Core.Features.AIFeature.Command.Model;
 using MedScanAI.Core.Features.AIFeature.Query.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -55,6 +56,14 @@ namespace MedScanAI.API.Controllers
         public async Task<IActionResult> GetChatbotResponse([FromBody] ChatbotQuery query)
         {
             var result = await Mediator.Send(query);
+            return ReturnResult(result);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> GenerateMedicalReport([FromBody] AddMedicalReportCommand command)
+        {
+            var result = await Mediator.Send(command);
             return ReturnResult(result);
         }
     }

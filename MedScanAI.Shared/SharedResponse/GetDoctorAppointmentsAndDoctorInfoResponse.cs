@@ -16,5 +16,6 @@
         public List<string> Allergies { get; set; }
         public List<string> CurrentMedicine { get; set; }
         public string AppointmentDate { get; set; }
+        public string MedicalReport { get; set; }
     }
 }

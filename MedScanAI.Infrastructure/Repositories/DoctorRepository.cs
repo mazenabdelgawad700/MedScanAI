@@ -13,11 +13,13 @@ namespace MedScanAI.Infrastructure.Repositories
         private readonly AppDbContext _dbContext;
         private readonly DbSet<Doctor> _doctors;
         private readonly DbSet<Appointment> _appointments;
+        private readonly DbSet<AIReport> _aiReports;
         public DoctorRepository(AppDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
             _doctors = _dbContext.Set<Doctor>();
             _appointments = _dbContext.Set<Appointment>();
+            _aiReports = _dbContext.Set<AIReport>();
         }
 
         public ReturnBase<IQueryable<Doctor>> GetActiveDoctors()
@@ -95,7 +97,8 @@ namespace MedScanAI.Infrastructure.Repositories
                     PatientName = a.PatientName,
                     ChronicDiseases = a.Patient?.ChronicDiseases?.Select(x => x.Name).ToList() ?? new List<string>(),
                     Allergies = a.Patient?.Allergies?.Select(x => x.Name).ToList() ?? new List<string>(),
-                    CurrentMedicine = a.Patient?.CurrentMedications?.Select(x => x.Name).ToList() ?? new List<string>()
+                    CurrentMedicine = a.Patient?.CurrentMedications?.Select(x => x.Name).ToList() ?? new List<string>(),
+                    MedicalReport = _aiReports.Where(r => r.PatientId == a.PatientId).Select(r => r.Report).FirstOrDefault() ?? "No medical report available"
                 }).ToList();
 
                 var response = new GetDoctorAppointmentsAndDoctorInfoResponse

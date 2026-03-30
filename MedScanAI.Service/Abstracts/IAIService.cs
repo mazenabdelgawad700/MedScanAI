@@ -12,5 +12,6 @@ namespace MedScanAI.Service.Abstracts
         Task<ReturnBase<ModelResponse>> GetXRayModelResponseAsync(IFormFile image, string userRole);
         Task<ReturnBase<LabModelResponse>> GetLabResultsModelResponseAsync(IFormFile image, string userRole);
         Task<ReturnBase<ChatbotResponse>> GetChatbotResponseAsync(string message, string userRole);
+        Task<ReturnBase<bool>> GenerateMedicalReportAsync(string patientId);
     }
 }

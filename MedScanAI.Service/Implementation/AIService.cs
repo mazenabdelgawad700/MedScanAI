@@ -1,4 +1,6 @@
-﻿using MedScanAI.Service.Abstracts;
+﻿using MedScanAI.Domain.Entities;
+using MedScanAI.Infrastructure.Abstracts;
+using MedScanAI.Service.Abstracts;
 using MedScanAI.Shared.Base;
 using MedScanAI.Shared.SharedResponse;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +12,112 @@ namespace MedScanAI.Service.Implementation
     internal class AIService : IAIService
     {
         private static readonly HttpClient _httpClient = new();
+        private readonly ICurrentMedicationRepository _currentMedicationRepository;
+        private readonly IPatientAllergiesRepository _patientAllergiesRepository;
+        private readonly IChronicDiseasesRepository _chronicDiseaseRepository;
+        private readonly IAIReportRepository _aiReportRepository;
+
+        public AIService(ICurrentMedicationRepository currentMedicationRepository, IPatientAllergiesRepository patientAllergiesRepository, IChronicDiseasesRepository chronicDiseaseRepository, IAIReportRepository aiReportRepository)
+        {
+            _currentMedicationRepository = currentMedicationRepository;
+            _patientAllergiesRepository = patientAllergiesRepository;
+            _chronicDiseaseRepository = chronicDiseaseRepository;
+            _aiReportRepository = aiReportRepository;
+        }
+
+        public async Task<ReturnBase<bool>> GenerateMedicalReportAsync(string patientId)
+        {
+            try
+            {
+                var medicationsResult = await _currentMedicationRepository.GetCurrentMedicationsByPatientId(patientId);
+
+                var allergiesResult = await _patientAllergiesRepository.GetAllergiesByPatientId(patientId);
+
+                var chronicDiseasesResult = await _chronicDiseaseRepository.GetChronicDiseasesByPatientId(patientId);
+
+
+                if (!medicationsResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>($"Failed to retrieve medications: {medicationsResult.Message}");
+
+                if (!allergiesResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>($"Failed to retrieve allergies: {allergiesResult.Message}");
+
+                if (!chronicDiseasesResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>($"Failed to retrieve chronic diseases: {chronicDiseasesResult.Message}");
+
+                if (medicationsResult.Data.Count == 0 && allergiesResult.Data.Count == 0 && chronicDiseasesResult.Data.Count == 0)
+                    return ReturnBaseHandler.Failed<bool>("No medical data found for the patient.");
+
+
+                var jsonMedicationRequest = JsonSerializer.Serialize(new
+                {
+                    medications = medicationsResult.Data,
+                });
+
+                var jsonConditionsRequest = JsonSerializer.Serialize(new
+                {
+                    conditions = allergiesResult.Data.Concat(chronicDiseasesResult.Data).ToList(),
+                });
+
+                var medicationContent = new StringContent(jsonMedicationRequest, System.Text.Encoding.UTF8, "application/json");
+
+                var conditionsContent = new StringContent(jsonConditionsRequest, System.Text.Encoding.UTF8, "application/json");
+
+                var medicationUrl = $"http://localhost:8005/patient/{patientId}/medications";
+
+                var conditionsUrl = $"http://localhost:8005/patient/{patientId}/conditions";
+                var medicationResponse = await _httpClient.PostAsync(medicationUrl, medicationContent);
+                if (!medicationResponse.IsSuccessStatusCode)
+                {
+                    var error = await medicationResponse.Content.ReadAsStringAsync();
+                    return ReturnBaseHandler.Failed<bool>($"API Error {medicationResponse.StatusCode} while sending medications: {error}");
+                }
+
+                var conditionsResponse = await _httpClient.PostAsync(conditionsUrl, conditionsContent);
+                if (!conditionsResponse.IsSuccessStatusCode)
+                {
+                    var error = await conditionsResponse.Content.ReadAsStringAsync();
+                    return ReturnBaseHandler.Failed<bool>($"API Error {conditionsResponse.StatusCode} while sending conditions: {error}");
+                }
+
+
+                var reportUrl = $"http://localhost:8005/report/{patientId}/doctor-report?user_role=patient";
+                var reportResponse = await _httpClient.GetAsync(reportUrl);
+
+                if (!reportResponse.IsSuccessStatusCode)
+                {
+                    var error = await reportResponse.Content.ReadAsStringAsync();
+                    return ReturnBaseHandler.Failed<bool>($"API Error {reportResponse.StatusCode} while generating report: {error}");
+                }
+
+                var reportJson = await reportResponse.Content.ReadAsStringAsync();
+
+                var reportData = JsonSerializer.Deserialize<JsonElement>(reportJson);
+
+                var reportText = reportData.GetProperty("report").GetString();
+
+                if (string.IsNullOrEmpty(reportText))
+                    return ReturnBaseHandler.Failed<bool>("Failed to retrieve report text from response");
+
+                var reportToStore = new AIReport()
+                {
+                    PatientId = patientId,
+                    Report = reportText,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var storeResult = await _aiReportRepository.AddAsync(reportToStore);
+
+                if (!storeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>($"Failed to store generated report: {storeResult.Message}");
+
+                return ReturnBaseHandler.Success(true);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
 
         public async Task<ReturnBase<ModelResponse>> GetBrainTumorModelResponseAsync(IFormFile image, string userRole)
         {

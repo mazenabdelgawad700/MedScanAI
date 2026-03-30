@@ -13,10 +13,7 @@ namespace MedScanAI.Domain.Entities
         [ForeignKey("Patient")]
         public string PatientId { get; set; }
         public int? AppointmentId { get; set; }
-
-        [MaxLength(500)]
-        public string ReportFileUrl { get; set; }
-
+        public string Report { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public Patient Patient { get; set; }
