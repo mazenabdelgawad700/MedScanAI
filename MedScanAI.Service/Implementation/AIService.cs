@@ -99,6 +99,22 @@ namespace MedScanAI.Service.Implementation
                 if (string.IsNullOrEmpty(reportText))
                     return ReturnBaseHandler.Failed<bool>("Failed to retrieve report text from response");
 
+
+                var existingReport = await _aiReportRepository.GetPatientExistingReportAsync(patientId);
+
+                if (existingReport.Succeeded && existingReport.Data is not null)
+                {
+                    existingReport.Data.Report = reportText;
+                    existingReport.Data.CreatedAt = DateTime.UtcNow;
+
+                    var updateResult = await _aiReportRepository.UpdateAsync(existingReport.Data);
+
+                    if (!updateResult.Succeeded)
+                        return ReturnBaseHandler.Failed<bool>($"Failed to update existing report: {updateResult.Message}");
+
+                    return ReturnBaseHandler.Success(true);
+                }
+
                 var reportToStore = new AIReport()
                 {
                     PatientId = patientId,
