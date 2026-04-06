@@ -178,7 +178,7 @@ namespace MedScanAI.Infrastructure.Seeders
 
         private async Task SeedPatientAccountAsync()
         {
-            const string patientEmail = "esraa@gmail.com";
+            const string patientEmail = "malak@gmail.com";
 
             var existingPatient = await _userManager.FindByEmailAsync(patientEmail);
             if (existingPatient != null)
@@ -187,8 +187,8 @@ namespace MedScanAI.Infrastructure.Seeders
             var patientUser = new ApplicationUser
             {
                 Id = Guid.NewGuid().ToString(),
-                UserName = "Esraa",
-                NormalizedUserName = "ESRAA",
+                UserName = "Malak",
+                NormalizedUserName = "MALAK",
                 Email = patientEmail,
                 NormalizedEmail = patientEmail.ToUpper(),
                 EmailConfirmed = true,
@@ -207,7 +207,7 @@ namespace MedScanAI.Infrastructure.Seeders
             var patient = new Patient
             {
                 Id = patientUser.Id,
-                FullName = "Esraa",
+                FullName = "Malak",
                 Email = patientEmail,
                 PhoneNumber = "+201158907731",
                 Gender = "Female",
