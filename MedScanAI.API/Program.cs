@@ -1,6 +1,7 @@
 using MedScanAI.Core;
 using MedScanAI.Infrastructure;
 using MedScanAI.Infrastructure.Context;
+using MedScanAI.Infrastructure.Seeders;
 using MedScanAI.Service;
 using MedScanAI.Shared.Hubs;
 using Microsoft.AspNetCore.Identity;
@@ -61,8 +62,7 @@ namespace MedScanAI.API
 
             builder.Services.AddSignalR();
             builder.Services.AddHttpClient();
-
-
+            builder.Services.AddScoped<DataSeeder>();
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -99,6 +99,12 @@ namespace MedScanAI.API
                     }
                 }
                 scope.Dispose();
+            }
+
+            using (var sc = app.Services.CreateScope())
+            {
+                var dataSeeder = sc.ServiceProvider.GetRequiredService<DataSeeder>();
+                await dataSeeder.SeedAsync();
             }
 
             app.Run();
