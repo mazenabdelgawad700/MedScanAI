@@ -234,7 +234,7 @@ namespace MedScanAI.Service.Implementation
             }
             catch (HttpRequestException ex)
             {
-                return ReturnBaseHandler.Failed<LabModelResponse>($"Connection failed — is FastAPI running on port 8001? {ex.Message}");
+                return ReturnBaseHandler.Failed<LabModelResponse>($"Connection failed — is FastAPI running on port 8005? {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -288,7 +288,7 @@ namespace MedScanAI.Service.Implementation
             }
             catch (HttpRequestException ex)
             {
-                return ReturnBaseHandler.Failed<ModelResponse>($"Connection failed — is FastAPI running on port 8001? {ex.Message}");
+                return ReturnBaseHandler.Failed<ModelResponse>($"Connection failed — is FastAPI running on port {port}? {ex.Message}");
             }
             catch (Exception ex)
             {
