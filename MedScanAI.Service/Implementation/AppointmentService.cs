@@ -150,7 +150,7 @@ namespace MedScanAI.Service.Implementation
             }
         }
 
-        public async Task<ReturnBase<bool>> MakeAppointmentAsync(Appointment appointment)
+        public async Task<ReturnBase<bool>> BookAppointmentAsync(Appointment appointment)
         {
             try
             {
@@ -164,10 +164,58 @@ namespace MedScanAI.Service.Implementation
                     appointment.PatientName = patientResult?.FullName;
                 }
 
-                var makeAppointmentResult = await _appointmentRepository.AddAsync(appointment);
+                var bookAppointmentResult = await _appointmentRepository.AddAsync(appointment);
 
-                if (!makeAppointmentResult.Succeeded)
-                    return ReturnBaseHandler.Failed<bool>(makeAppointmentResult.Message);
+                if (!bookAppointmentResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(bookAppointmentResult.Message);
+
+                // Fire SignalR event for new appointment creation
+                await _hubContext.Clients.All.SendAsync("AppointmentCreated", new
+                {
+                    AppointmentId = appointment.Id,
+                    PatientId = appointment.PatientId,
+                    PatientName = appointment.PatientName,
+                    DoctorId = appointment.DoctorId,
+                    AppointmentDate = appointment.Date,
+                    Reason = appointment.Reason,
+                    Status = appointment.Status,
+                    Message = "New appointment has been created"
+                });
+
+                return ReturnBaseHandler.Success(true, "Appointment made successfully.");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> BookAppointmentByAdminAsync(Appointment appointment)
+        {
+            /*
+            
+            I know it is not the best coding design and we can design it more properly 
+            but we have a deadline comming up.. ^_^
+
+             */
+            try
+            {
+                if (appointment.PatientId is not null)
+                {
+                    // Get the patient name and store it the appointment
+                    var patientResult = await
+                        _patientRepository.GetTableNoTracking()
+                        .Data!.Where(x => x.Id == appointment.PatientId).FirstOrDefaultAsync();
+
+                    appointment.PatientName = patientResult?.FullName;
+                }
+
+                appointment.Status = "Confirmed";
+
+                var bookAppointmentResult = await _appointmentRepository.AddAsync(appointment);
+
+                if (!bookAppointmentResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(bookAppointmentResult.Message);
 
                 // Fire SignalR event for new appointment creation
                 await _hubContext.Clients.All.SendAsync("AppointmentCreated", new

@@ -6,7 +6,8 @@ namespace MedScanAI.Service.Abstracts
 {
     public interface IAppointmentService
     {
-        Task<ReturnBase<bool>> MakeAppointmentAsync(Appointment appointment);
+        Task<ReturnBase<bool>> BookAppointmentAsync(Appointment appointment);
+        Task<ReturnBase<bool>> BookAppointmentByAdminAsync(Appointment appointment);
         Task<ReturnBase<bool>> ConfirmAppointmentAsync(int appointmentId);
         Task<ReturnBase<bool>> CompleteAppointmentAsync(int appointmentId);
         Task<ReturnBase<bool>> CancelAppointmentAsync(int appointmentId);

@@ -3,7 +3,7 @@ using MedScanAI.Shared.Base;
 
 namespace MedScanAI.Core.Features.AppointmentFeature.Command.Model
 {
-    public class MakeAppointmentCommand : IRequest<ReturnBase<bool>>
+    public class BookAppointmentCommand : IRequest<ReturnBase<bool>>
     {
         public string? PatientId { get; set; }
         public string? PatientName { get; set; }

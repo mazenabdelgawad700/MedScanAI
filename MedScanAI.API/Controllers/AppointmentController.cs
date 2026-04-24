@@ -12,8 +12,16 @@ namespace MedScanAI.API.Controllers
     public class AppointmentController : AppControllerBase
     {
         [HttpPost]
-        [Authorize(Roles = "Patient,Admin")]
-        public async Task<IActionResult> MakeAppointment([FromBody] MakeAppointmentCommand command)
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> BookAppointment([FromBody] BookAppointmentCommand command)
+        {
+            var result = await Mediator.Send(command);
+            return ReturnResult(result);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> BookAppointmentByAdmin([FromBody] BookAppointmentByAdminCommand command)
         {
             var result = await Mediator.Send(command);
             return ReturnResult(result);

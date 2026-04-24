@@ -7,7 +7,8 @@ using MedScanAI.Shared.Base;
 namespace MedScanAI.Core.Features.AppointmentFeature.Command.Handler
 {
     public class AppointmentCommandHandler :
-        IRequestHandler<MakeAppointmentCommand, ReturnBase<bool>>,
+        IRequestHandler<BookAppointmentCommand, ReturnBase<bool>>,
+        IRequestHandler<BookAppointmentByAdminCommand, ReturnBase<bool>>,
         IRequestHandler<ConfirmAppointmentCommand, ReturnBase<bool>>,
         IRequestHandler<CompleteAppointmentCommand, ReturnBase<bool>>,
         IRequestHandler<CancelAppointmentCommand, ReturnBase<bool>>
@@ -21,18 +22,36 @@ namespace MedScanAI.Core.Features.AppointmentFeature.Command.Handler
             _appointmentService = appointmentService;
             _mapper = mapper;
         }
-        public async Task<ReturnBase<bool>> Handle(MakeAppointmentCommand request, CancellationToken cancellationToken)
+        public async Task<ReturnBase<bool>> Handle(BookAppointmentCommand request, CancellationToken cancellationToken)
         {
             try
             {
                 var appointmentEntity = _mapper.Map<Domain.Entities.Appointment>(request);
 
-                var makeAppointmentResult = await _appointmentService.MakeAppointmentAsync(appointmentEntity);
+                var bookAppointmentResult = await _appointmentService.BookAppointmentAsync(appointmentEntity);
 
-                if (!makeAppointmentResult.Succeeded)
-                    return ReturnBaseHandler.Failed<bool>(makeAppointmentResult.Message);
+                if (!bookAppointmentResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(bookAppointmentResult.Message);
 
-                return ReturnBaseHandler.Success(true, makeAppointmentResult.Message);
+                return ReturnBaseHandler.Success(true, bookAppointmentResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+        public async Task<ReturnBase<bool>> Handle(BookAppointmentByAdminCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var appointmentEntity = _mapper.Map<Domain.Entities.Appointment>(request);
+
+                var bookAppointmentResult = await _appointmentService.BookAppointmentByAdminAsync(appointmentEntity);
+
+                if (!bookAppointmentResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(bookAppointmentResult.Message);
+
+                return ReturnBaseHandler.Success(true, bookAppointmentResult.Message);
             }
             catch (Exception ex)
             {
