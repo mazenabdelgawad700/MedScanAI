@@ -51,7 +51,7 @@ namespace MedScanAI.Service.Implementation
             }
             catch (Exception ex)
             {
-                return ReturnBaseHandler.Failed<bool>(ex.InnerException.Message);
+                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
             }
         }
     }
