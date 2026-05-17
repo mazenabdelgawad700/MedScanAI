@@ -24,7 +24,7 @@ namespace MedScanAI.API.Controllers
         [HttpPost]
         public async Task<IActionResult> RegisterPatient([FromBody] RegisterPatientCommand command)
         {
-            ReturnBase<bool> response = await Mediator.Send(command);
+            ReturnBase<string> response = await Mediator.Send(command);
             return ReturnResult(response);
         }
 

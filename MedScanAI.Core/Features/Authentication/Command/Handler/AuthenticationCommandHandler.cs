@@ -9,7 +9,7 @@ namespace MedScanAI.Core.Features.Authentication.Command.Handler
 {
     public class AuthenticationCommandHandler :
         IRequestHandler<RegisterDoctorCommand, ReturnBase<bool>>,
-        IRequestHandler<RegisterPatientCommand, ReturnBase<bool>>,
+        IRequestHandler<RegisterPatientCommand, ReturnBase<string>>,
         IRequestHandler<RegisterAdminCommand, ReturnBase<bool>>,
         IRequestHandler<ConfirmEmailCommand, ReturnBase<bool>>,
         IRequestHandler<ResetPasswordCommand, ReturnBase<bool>>,
@@ -152,7 +152,7 @@ namespace MedScanAI.Core.Features.Authentication.Command.Handler
                 return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
             }
         }
-        public async Task<ReturnBase<bool>> Handle(RegisterPatientCommand request, CancellationToken cancellationToken)
+        public async Task<ReturnBase<string>> Handle(RegisterPatientCommand request, CancellationToken cancellationToken)
         {
             try
             {
@@ -161,13 +161,13 @@ namespace MedScanAI.Core.Features.Authentication.Command.Handler
                 var registerPatientResult = await _authenticationService.RegisterPatientAsync(mappedResult, request.Password);
 
                 if (!registerPatientResult.Succeeded)
-                    return ReturnBaseHandler.Failed<bool>(registerPatientResult.Message);
+                    return ReturnBaseHandler.Failed<string>(registerPatientResult.Message);
 
-                return ReturnBaseHandler.Success(true, registerPatientResult.Message);
+                return ReturnBaseHandler.Success(registerPatientResult.Data!, registerPatientResult.Message);
             }
             catch (Exception ex)
             {
-                return ReturnBaseHandler.Failed<bool>(ex.InnerException?.Message ?? ex.Message);
+                return ReturnBaseHandler.Failed<string>(ex.InnerException?.Message ?? ex.Message);
             }
         }
 

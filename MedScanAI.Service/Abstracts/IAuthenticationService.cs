@@ -5,7 +5,7 @@ namespace MedScanAI.Service.Abstracts
 {
     public interface IAuthenticationService
     {
-        Task<ReturnBase<bool>> RegisterPatientAsync(Patient patient, string password);
+        Task<ReturnBase<string>> RegisterPatientAsync(Patient patient, string password);
         Task<ReturnBase<bool>> RegisterDoctorAsync(Doctor doctor, List<string> workDays, TimeSpan startTime, TimeSpan endTime, string password);
         Task<ReturnBase<bool>> RegisterAdminAsync(ApplicationUser user, string password);
         Task<ReturnBase<string>> LoginAsync(string email, string password);

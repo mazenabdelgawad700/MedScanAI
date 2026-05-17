@@ -3,7 +3,7 @@ using MedScanAI.Shared.Base;
 
 namespace MedScanAI.Core.Features.Authentication.Command.Model
 {
-    public class RegisterPatientCommand : IRequest<ReturnBase<bool>>
+    public class RegisterPatientCommand : IRequest<ReturnBase<string>>
     {
         public string FullName { get; set; }
         public string Password { get; set; }

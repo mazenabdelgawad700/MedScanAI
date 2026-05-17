@@ -33,37 +33,45 @@ namespace MedScanAI.Service.Implementation
             var transaction = await _chronicDiseasesRepository.BeginTransactionAsync();
             try
             {
-                var chronicDiseases = ChronicDiseases
-                    .Select(cd => new PatientChronicDisease { Name = cd, PatientId = patientId, Notes = "" }).ToList();
+                var chronicDiseases = ChronicDiseases?.Select(cd => new PatientChronicDisease { Name = cd, PatientId = patientId, Notes = "" }).ToList();
 
-                var currentMedications = CurrentMedication
+                var currentMedications = CurrentMedication?
                     .Select(cm => new PatientCurrentMedication { Name = cm, PatientId = patientId }).ToList();
 
-                var allergies = Allergies
+                var allergies = Allergies?
                     .Select(a => new PatientAllergy { Name = a, PatientId = patientId }).ToList();
 
-                var saveChronicDiseasesResult = await _chronicDiseasesRepository.AddRangeAsync(chronicDiseases);
-
-                if (!saveChronicDiseasesResult.Succeeded)
+                if (chronicDiseases is not null)
                 {
-                    await transaction.RollbackAsync();
-                    return ReturnBaseHandler.Failed<bool>(saveChronicDiseasesResult.Message);
+                    var saveChronicDiseasesResult = await _chronicDiseasesRepository.AddRangeAsync(chronicDiseases);
+
+                    if (!saveChronicDiseasesResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<bool>(saveChronicDiseasesResult.Message);
+                    }
                 }
 
-                var saveCurrentMedicationResult = await _currentMedicationRepository.AddRangeAsync(currentMedications);
-
-                if (!saveCurrentMedicationResult.Succeeded)
+                if (currentMedications is not null)
                 {
-                    await transaction.RollbackAsync();
-                    return ReturnBaseHandler.Failed<bool>(saveCurrentMedicationResult.Message);
+                    var saveCurrentMedicationResult = await _currentMedicationRepository.AddRangeAsync(currentMedications);
+
+                    if (!saveCurrentMedicationResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<bool>(saveCurrentMedicationResult.Message);
+                    }
                 }
 
-                var saveAllergiesResult = await _patientAllergiesRepository.AddRangeAsync(allergies);
-
-                if (!saveAllergiesResult.Succeeded)
+                if (allergies is not null)
                 {
-                    await transaction.RollbackAsync();
-                    return ReturnBaseHandler.Failed<bool>(saveAllergiesResult.Message);
+                    var saveAllergiesResult = await _patientAllergiesRepository.AddRangeAsync(allergies);
+
+                    if (!saveAllergiesResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<bool>(saveAllergiesResult.Message);
+                    }
                 }
 
                 await transaction.CommitAsync();

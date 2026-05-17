@@ -39,9 +39,9 @@ namespace MedScanAI.Service.Implementation
             this._doctorScheduleRepository = doctorScheduleRepository;
         }
 
-        public async Task<ReturnBase<bool>> RegisterPatientAsync(Patient patient, string password)
+        public async Task<ReturnBase<string>> RegisterPatientAsync(Patient patient, string password)
         {
-            var response = new ReturnBase<bool>();
+            var response = new ReturnBase<string>();
 
             try
             {
@@ -79,21 +79,23 @@ namespace MedScanAI.Service.Implementation
                 _dbContext.Patients.Add(patient);
                 await _dbContext.SaveChangesAsync();
 
+                string token = await GenerateJsonWebTokenAsync(appUser);
+
                 response.Succeeded = true;
-                response.Data = true;
+                response.Data = token; // return the token so, the user can create his medical profile
 
                 var sendConfirmationEmailResult = await _confirmEmailService.SendConfirmationEmailAsync(appUser);
 
-                while (!sendConfirmationEmailResult.Succeeded)
-                    sendConfirmationEmailResult = await _confirmEmailService.SendConfirmationEmailAsync(appUser);
-
-                response.Message = "Patient registered successfully. Please, confirm your email address";
+                if (!sendConfirmationEmailResult.Succeeded)
+                    response.Message = "Patient registerd successfully yet could not send confirmation email!";
+                else
+                    response.Message = "Patient registered successfully. Please, confirm your email address";
             }
             catch (Exception ex)
             {
                 response.Succeeded = false;
                 response.Message = "Error while registering patient: " + ex.Message;
-                response.Data = false;
+                response.Data = string.Empty;
             }
 
             return response;
@@ -163,6 +165,15 @@ namespace MedScanAI.Service.Implementation
 
             return response;
         }
+
+        private async Task<string> GenerateJsonWebTokenAsync(ApplicationUser user)
+        {
+            string jwtId = Guid.NewGuid().ToString();
+            string token = await GenerateJwtToken(user, jwtId);
+            await BuildRefreshToken(user, jwtId);
+
+            return token;
+        }
         public async Task<ReturnBase<string>> LoginAsync(string email, string password)
         {
             try
@@ -200,10 +211,8 @@ namespace MedScanAI.Service.Implementation
                     return ReturnBaseHandler.Failed<string>($"Your account is locked until {user.LockoutEnd.Value.ToLocalTime().ToString("f")}");
                 }
 
-                string jwtId = Guid.NewGuid().ToString();
-                string token = await GenerateJwtToken(user, jwtId);
 
-                await BuildRefreshToken(user, jwtId);
+                string token = await GenerateJsonWebTokenAsync(user);
 
                 await _dbContext.SaveChangesAsync();
 
@@ -220,7 +229,7 @@ namespace MedScanAI.Service.Implementation
             }
             catch (Exception ex)
             {
-                return ReturnBaseHandler.Failed<string>(ex.InnerException.Message);
+                return ReturnBaseHandler.Failed<string>(ex.InnerException?.Message ?? ex.Message);
             }
         }
         public async Task<ReturnBase<string>> RefreshTokenAsync(string accessToken)
